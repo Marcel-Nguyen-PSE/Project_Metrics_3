@@ -178,5 +178,5 @@ table1_panel2_p <- data.frame(
   Forecast_Standard_Errors = round(se_fe_p[c(1,4,8,12)],2)
   
 )
-
+aaaaaaaaaa
 
