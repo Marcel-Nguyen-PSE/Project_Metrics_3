@@ -1,4 +1,31 @@
 library(tidyverse)
+library(readxl)
+library(rio)
+library(xtable)
+library(here)
+library(gtsummary)
+library(glue)
+library(scales)
+library(patchwork)
+library(stargazer)
+library(sandwich)
+library(lmtest)
+library(AER)
+library(car)
+library(haven)
+library(fixest) 
+library(sf)
 library(did)
-1234
-df <- 13
+library(rdrobust)
+library(TwoWayFEWeights)
+library(Synth)
+library(fredr)
+library(tseries)
+library(urca)
+library(vars)
+library(forecast)
+
+usethis :: edit_r_environ ()
+
+
+
