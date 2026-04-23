@@ -175,6 +175,5 @@ se_fe_r <- (fe$fcst$r[c(1,4,8,12), 'upper'] - fe$fcst$r[c(1,4,8,12), 'lower']) /
 
 table1_panel2_p <- data.frame(
   Forecast_Horizon = c(1,4,8,12),
-  Forecast_Standard_Errors = round(se_fe_p[c(1,4,8,12)],2),
-
+  Forecast_Standard_Errors = round(se_fe_p[c(1,4,8,12)],2)
 )
