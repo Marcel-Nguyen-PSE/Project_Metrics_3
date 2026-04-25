@@ -280,3 +280,6 @@ Horizon & SE & $p$ & $u$ & $r$ \\\\
 )
 
 writeLines(latex_code, "table_1_full.tex")
+
+saveRDS(var_1, "var_1_reduced_form.rds")
+saveRDS(macro_1960_2000, "macro_1960_2000.rds")
