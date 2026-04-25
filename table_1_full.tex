@@ -1,0 +1,62 @@
+\begin{table}[!htbp]
+\centering
+\caption{VAR Descriptive Statistics for $(p,u,r)$}
+
+\begin{tabular}{lccc}
+\hline
+\multicolumn{4}{l}{\textbf{A. Granger-Causality Tests}} \\
+\hline
+ & \multicolumn{3}{c}{\textbf{Dependent Variable in Regression}} \\
+\cline{2-4}
+\textbf{Regressor} & $p$ & $u$ & $r$ \\
+\hline
+$p$ & 0 & 0.37 & 0 \\
+$u$ & 0.12 & 0 & 0 \\
+$r$ & 0.24 & 0 & 0 \\
+\hline
+\end{tabular}
+
+\vspace{0.35cm}
+
+\begin{tabular}{ccccc}
+\multicolumn{5}{l}{\textbf{B. Variance Decompositions from the Recursive VAR Ordered as $p,u,r$}} \\
+\hline
+\multicolumn{5}{l}{\textbf{B.i. Variance Decomposition of $p$}} \\
+\hline
+\textbf{Forecast} & \textbf{Forecast} & \multicolumn{3}{c}{\textbf{Variance Decomposition}} \\
+\textbf{Horizon} & \textbf{Standard Error} & \multicolumn{3}{c}{\textbf{(Percentage Points)}} \\
+\cline{3-5}
+ & & $p$ & $u$ & $r$ \\
+\hline
+1 & 1 & 100 & 0 & 0 \\
+4 & 1.42 & 90 & 8 & 2 \\
+8 & 1.82 & 86 & 12 & 2 \\
+12 & 2.04 & 86 & 12 & 2 \\
+\hline
+\multicolumn{5}{l}{\textbf{B.ii. Variance Decomposition of $u$}} \\
+\hline
+\textbf{Forecast} & \textbf{Forecast} & \multicolumn{3}{c}{\textbf{Variance Decomposition}} \\
+\textbf{Horizon} & \textbf{Standard Error} & \multicolumn{3}{c}{\textbf{(Percentage Points)}} \\
+\cline{3-5}
+ & & $p$ & $u$ & $r$ \\
+\hline
+1 & 0.23 & 0 & 100 & 0 \\
+4 & 0.64 & 0 & 97 & 2 \\
+8 & 0.8 & 8 & 79 & 13 \\
+12 & 0.95 & 21 & 61 & 19 \\
+\hline
+\multicolumn{5}{l}{\textbf{B.iii. Variance Decomposition of $r$}} \\
+\hline
+\textbf{Forecast} & \textbf{Forecast} & \multicolumn{3}{c}{\textbf{Variance Decomposition}} \\
+\textbf{Horizon} & \textbf{Standard Error} & \multicolumn{3}{c}{\textbf{(Percentage Points)}} \\
+\cline{3-5}
+ & & $p$ & $u$ & $r$ \\
+\hline
+1 & 0.88 & 3 & 18 & 79 \\
+4 & 1.89 & 12 & 48 & 41 \\
+8 & 2.49 & 15 & 57 & 29 \\
+12 & 2.67 & 20 & 55 & 26 \\
+\hline
+\end{tabular}
+
+\end{table}

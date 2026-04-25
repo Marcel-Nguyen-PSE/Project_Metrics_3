@@ -25,9 +25,15 @@ library(urca)
 library(vars)
 library(forecast)
 library(typstable)
+library(lubridate)
 
 fred_key <- Sys.getenv('FRED_API_KEY')
 
+if (fred_key == "") {
+  stop("FRED_API_KEY is not set.")
+}
+
+fredr_set_key(fred_key)
 ######################################################### Main dataset using fred package and monthly obs.
 
 gdpd <- fredr(series_id = "GDPDEF",
@@ -54,24 +60,24 @@ ffr_q <- ffr %>%
   group_by(date) %>%
   summarise(r = mean(value), .groups = "drop")
 
-# Final data set
+# building the final data set : 3 VAR variables
 
 macro <- gdpd %>%
   transmute(date, gdpd = value) %>%
   left_join(unrate_q, by = "date") %>%
   left_join(ffr_q, by = "date") %>%
   arrange(date) %>%
-  mutate(p = 400 * log(gdpd / lag(gdpd))) %>%
+  mutate(p = 400 * log(gdpd / lag(gdpd))) %>%    #annualized quaterly inflation
   dplyr::select(date, p, u, r)
 
 ### Inflation variable 
 
 macro_1960_2000 <- macro %>%
   filter(date >= as.Date("1960-01-01"),
-         date <  as.Date("2001-01-01")) %>%
+         date <  as.Date("2001-01-01")) %>%      #keeps 1960:I to 2000:IV.
   dplyr::select(p,u,r)
 
-#### Reduced form VAR 
+#### Reduced form VAR : 4 lags and a constant.
 
 var_1 <- VAR(
   y = macro_1960_2000,
@@ -189,5 +195,149 @@ mutate(horizon = c(1,4,8,12))
 table1_fe_err <- tt(data.frame(fe_err_comb), rownames = FALSE, align = 'center')
 tt_save(table1_fe_err, 'table_1_forecast_err.typ')
 
+horizons <- c(1, 4, 8, 12)
 
+panelA <- round(table_1, 2)
 
+panelB_p <- data.frame(
+  h = horizons,
+  se = round(se_fe_p, 2),
+  round(var_comp$p[horizons, ] * 100, 0)
+)
+
+panelB_u <- data.frame(
+  h = horizons,
+  se = round(se_fe_u, 2),
+  round(var_comp$u[horizons, ] * 100, 0)
+)
+
+panelB_r <- data.frame(
+  h = horizons,
+  se = round(se_fe_r, 2),
+  round(var_comp$r[horizons, ] * 100, 0)
+)
+
+make_rows <- function(df) {
+  paste0(
+    df$h, " & ", df$se, " & ", df$p, " & ", df$u, " & ", df$r, " \\\\",
+    collapse = "\n"
+  )
+}
+
+latex_code <- paste0(
+"\\begin{table}[!htbp]
+\\centering
+\\caption{VAR Descriptive Statistics for $(p,u,r)$}
+
+\\begin{tabular}{lccc}
+\\hline
+\\multicolumn{4}{l}{\\textbf{A. Granger-Causality Tests}} \\\\
+\\hline
+ & \\multicolumn{3}{c}{\\textbf{Dependent Variable in Regression}} \\\\
+\\cline{2-4}
+\\textbf{Regressor} & $p$ & $u$ & $r$ \\\\
+\\hline
+$p$ & ", panelA["p","p"], " & ", panelA["p","u"], " & ", panelA["p","r"], " \\\\
+$u$ & ", panelA["u","p"], " & ", panelA["u","u"], " & ", panelA["u","r"], " \\\\
+$r$ & ", panelA["r","p"], " & ", panelA["r","u"], " & ", panelA["r","r"], " \\\\
+\\hline
+\\end{tabular}
+
+\\vspace{0.35cm}
+
+\\begin{tabular}{ccccc}
+\\multicolumn{5}{l}{\\textbf{B. Variance Decompositions from the Recursive VAR Ordered as $p,u,r$}} \\\\
+\\hline
+\\multicolumn{5}{l}{\\textbf{B.i. Variance Decomposition of $p$}} \\\\
+\\hline
+\\textbf{Forecast} & \\textbf{Forecast} & \\multicolumn{3}{c}{\\textbf{Variance Decomposition}} \\\\
+\\textbf{Horizon} & \\textbf{Standard Error} & \\multicolumn{3}{c}{\\textbf{(Percentage Points)}} \\\\
+\\cline{3-5}
+ & & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_p), "
+\\hline
+\\multicolumn{5}{l}{\\textbf{B.ii. Variance Decomposition of $u$}} \\\\
+\\hline
+\\textbf{Forecast} & \\textbf{Forecast} & \\multicolumn{3}{c}{\\textbf{Variance Decomposition}} \\\\
+\\textbf{Horizon} & \\textbf{Standard Error} & \\multicolumn{3}{c}{\\textbf{(Percentage Points)}} \\\\
+\\cline{3-5}
+ & & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_u), "
+\\hline
+\\multicolumn{5}{l}{\\textbf{B.iii. Variance Decomposition of $r$}} \\\\
+\\hline
+\\textbf{Forecast} & \\textbf{Forecast} & \\multicolumn{3}{c}{\\textbf{Variance Decomposition}} \\\\
+\\textbf{Horizon} & \\textbf{Standard Error} & \\multicolumn{3}{c}{\\textbf{(Percentage Points)}} \\\\
+\\cline{3-5}
+ & & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_r), "
+\\hline
+\\end{tabular}
+
+\\end{table}"
+)
+
+writeLines(latex_code, "table_1_full.tex")
+
+latex_code <- paste0(
+"\\begin{table}[!htbp]
+\\centering
+\\caption{VAR Descriptive Statistics for $(p,u,r)$}
+
+\\begin{tabular}{lccc}
+\\hline
+\\multicolumn{4}{l}{\\textbf{A. Granger-Causality Tests}} \\\\
+\\hline
+ & \\multicolumn{3}{c}{Dependent Variable} \\\\
+\\cline{2-4}
+Regressor & $p$ & $u$ & $r$ \\\\
+\\hline
+$p$ & ", panelA["p","p"], " & ", panelA["p","u"], " & ", panelA["p","r"], " \\\\
+$u$ & ", panelA["u","p"], " & ", panelA["u","u"], " & ", panelA["u","r"], " \\\\
+$r$ & ", panelA["r","p"], " & ", panelA["r","u"], " & ", panelA["r","r"], " \\\\
+\\hline
+\\end{tabular}
+
+\\vspace{0.3cm}
+
+\\begin{tabular}{lcccc}
+\\multicolumn{5}{l}{\\textbf{B.i. Variance Decomposition of $p$}} \\\\
+\\hline
+Horizon & SE & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_p), "
+\\hline
+\\end{tabular}
+
+\\vspace{0.3cm}
+
+\\begin{tabular}{lcccc}
+\\multicolumn{5}{l}{\\textbf{B.ii. Variance Decomposition of $u$}} \\\\
+\\hline
+Horizon & SE & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_u), "
+\\hline
+\\end{tabular}
+
+\\vspace{0.3cm}
+
+\\begin{tabular}{lcccc}
+\\multicolumn{5}{l}{\\textbf{B.iii. Variance Decomposition of $r$}} \\\\
+\\hline
+Horizon & SE & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_r), "
+\\hline
+\\end{tabular}
+
+\\end{table}"
+)
+
+writeLines(latex_code, "table_1_full.tex")
+
+saveRDS(var_1, "var_1_reduced_form.rds")
+saveRDS(macro_1960_2000, "macro_1960_2000.rds")
