@@ -6,3 +6,5 @@ Project Econometrics 3
 23/04/26: I reproduced the panel A of Table 1 but coefficients differ significantly -> solution: take montly data then compute manually quaterly averages as in the paper (rather than quarter point values from fred) - > I obtain much similar results, minor significances due to the fred data being revised ?
 
 Panel A of Table 1 is saved in the .typ format and .tex for practicity
+
+25/04/26 : table 1 results are reproduced in a main latex files. pdf is available.
