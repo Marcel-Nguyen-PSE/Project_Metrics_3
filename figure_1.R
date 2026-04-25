@@ -70,7 +70,6 @@ macro_1960_2000 <- macro %>%
   filter(date >= as.Date("1960-01-01"),
          date <  as.Date("2001-01-01")) %>%
   dplyr::select(p,u,r)
-  na.omit() 
 
 #### Reduced form VAR 
 
@@ -134,7 +133,7 @@ p_val_r_r <- linearHypothesis(var_1_r, c(
   "r.l1 = 0", "r.l2 = 0", "r.l3 = 0", "r.l4 = 0"
 ))[2, "Pr(>F)"]
 
-table_1 <- t(data.frame(c(
+table_1 <- t(matrix(c(
   p_val_p_p, p_val_p_u, p_val_p_r,
   p_val_u_p, p_val_u_u, p_val_u_r,
   p_val_r_p, p_val_r_u, p_val_r_r
@@ -148,7 +147,7 @@ round(table_1, 2)
 # Final output
 
 table_1_panelA <- tt(
-  table_1,
+  data.frame(table_1),
   rownames = TRUE,       
   align = "center"
 )
@@ -176,6 +175,5 @@ se_fe_r <- (fe$fcst$r[c(1,4,8,12), 'upper'] - fe$fcst$r[c(1,4,8,12), 'lower']) /
 table1_panel2_p <- data.frame(
   Forecast_Horizon = c(1,4,8,12),
   Forecast_Standard_Errors = round(se_fe_p[c(1,4,8,12)],2)
-  
 )
 
