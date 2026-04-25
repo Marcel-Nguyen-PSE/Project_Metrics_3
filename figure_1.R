@@ -233,6 +233,64 @@ latex_code <- paste0(
 \\hline
 \\multicolumn{4}{l}{\\textbf{A. Granger-Causality Tests}} \\\\
 \\hline
+ & \\multicolumn{3}{c}{\\textbf{Dependent Variable in Regression}} \\\\
+\\cline{2-4}
+\\textbf{Regressor} & $p$ & $u$ & $r$ \\\\
+\\hline
+$p$ & ", panelA["p","p"], " & ", panelA["p","u"], " & ", panelA["p","r"], " \\\\
+$u$ & ", panelA["u","p"], " & ", panelA["u","u"], " & ", panelA["u","r"], " \\\\
+$r$ & ", panelA["r","p"], " & ", panelA["r","u"], " & ", panelA["r","r"], " \\\\
+\\hline
+\\end{tabular}
+
+\\vspace{0.35cm}
+
+\\begin{tabular}{ccccc}
+\\multicolumn{5}{l}{\\textbf{B. Variance Decompositions from the Recursive VAR Ordered as $p,u,r$}} \\\\
+\\hline
+\\multicolumn{5}{l}{\\textbf{B.i. Variance Decomposition of $p$}} \\\\
+\\hline
+\\textbf{Forecast} & \\textbf{Forecast} & \\multicolumn{3}{c}{\\textbf{Variance Decomposition}} \\\\
+\\textbf{Horizon} & \\textbf{Standard Error} & \\multicolumn{3}{c}{\\textbf{(Percentage Points)}} \\\\
+\\cline{3-5}
+ & & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_p), "
+\\hline
+\\multicolumn{5}{l}{\\textbf{B.ii. Variance Decomposition of $u$}} \\\\
+\\hline
+\\textbf{Forecast} & \\textbf{Forecast} & \\multicolumn{3}{c}{\\textbf{Variance Decomposition}} \\\\
+\\textbf{Horizon} & \\textbf{Standard Error} & \\multicolumn{3}{c}{\\textbf{(Percentage Points)}} \\\\
+\\cline{3-5}
+ & & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_u), "
+\\hline
+\\multicolumn{5}{l}{\\textbf{B.iii. Variance Decomposition of $r$}} \\\\
+\\hline
+\\textbf{Forecast} & \\textbf{Forecast} & \\multicolumn{3}{c}{\\textbf{Variance Decomposition}} \\\\
+\\textbf{Horizon} & \\textbf{Standard Error} & \\multicolumn{3}{c}{\\textbf{(Percentage Points)}} \\\\
+\\cline{3-5}
+ & & $p$ & $u$ & $r$ \\\\
+\\hline
+", make_rows(panelB_r), "
+\\hline
+\\end{tabular}
+
+\\end{table}"
+)
+
+writeLines(latex_code, "table_1_full.tex")
+
+latex_code <- paste0(
+"\\begin{table}[!htbp]
+\\centering
+\\caption{VAR Descriptive Statistics for $(p,u,r)$}
+
+\\begin{tabular}{lccc}
+\\hline
+\\multicolumn{4}{l}{\\textbf{A. Granger-Causality Tests}} \\\\
+\\hline
  & \\multicolumn{3}{c}{Dependent Variable} \\\\
 \\cline{2-4}
 Regressor & $p$ & $u$ & $r$ \\\\

@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1777123429.85858 "d:/Documents/cours sorbonne/M1/S2/Econometrics 3/metrics try 2/Project_Metrics_3/main.tex" "main.pdf" "main" 1777123430.31793 0
+["pdflatex"] 1777128439.30798 "d:/Documents/cours sorbonne/M1/S2/Econometrics 3/metrics try 2/Project_Metrics_3/main.tex" "main.pdf" "main" 1777128439.70505 0
   "c:/Users/alexi/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1769337116 1004 54797486969f23fa377b128694d548df ""
   "c:/Users/alexi/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm" 1769337116 1328 c834bbb027764024c09d3d2bf908b5f0 ""
   "c:/Users/alexi/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1769337117 34811 78b52f49e893bcba91bd7581cdc144c0 ""
@@ -22,9 +22,9 @@
   "c:/Users/alexi/AppData/Roaming/TinyTeX/texmf-var/web2c/pdftex/pdflatex.fmt" 1769337120 2236258 44d8383c5eecdddb00b0282fa57ffb8b ""
   "c:/Users/alexi/AppData/Roaming/TinyTeX/texmf.cnf" 1769337135 956 b1b02114e0ad806b8e5e4bf93f21abb8 ""
   "d:/Documents/cours sorbonne/M1/S2/Econometrics 3/metrics try 2/Project_Metrics_3/main.tex" 1777123347 146 baa45fec54eb8d6415d565673c065459 ""
-  "main.aux" 1777123430 174 7f8267742be10861b7d1cfb5a55f218c "pdflatex"
+  "main.aux" 1777128439 174 7f8267742be10861b7d1cfb5a55f218c "pdflatex"
   "main.tex" 1777123347 146 baa45fec54eb8d6415d565673c065459 ""
-  "table_1_full.tex" 1777122738 1279 49d31e5b0a2235812149b09b0b363c22 ""
+  "table_1_full.tex" 1777128437 1895 64299f6ca4d62af54978d8779faa2eb8 ""
   (generated)
   "main.aux"
   "main.log"
