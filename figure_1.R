@@ -227,7 +227,7 @@ make_rows <- function(df) {
 latex_code <- paste0(
 "\\begin{table}[!htbp]
 \\centering
-\\caption{VAR Descriptive Statistics for $(p,u,R)$}
+\\caption{VAR Descriptive Statistics for $(p,u,r)$}
 
 \\begin{tabular}{lccc}
 \\hline
@@ -235,11 +235,11 @@ latex_code <- paste0(
 \\hline
  & \\multicolumn{3}{c}{Dependent Variable} \\\\
 \\cline{2-4}
-Regressor & $p$ & $u$ & $R$ \\\\
+Regressor & $p$ & $u$ & $r$ \\\\
 \\hline
 $p$ & ", panelA["p","p"], " & ", panelA["p","u"], " & ", panelA["p","r"], " \\\\
 $u$ & ", panelA["u","p"], " & ", panelA["u","u"], " & ", panelA["u","r"], " \\\\
-$R$ & ", panelA["r","p"], " & ", panelA["r","u"], " & ", panelA["r","r"], " \\\\
+$r$ & ", panelA["r","p"], " & ", panelA["r","u"], " & ", panelA["r","r"], " \\\\
 \\hline
 \\end{tabular}
 
@@ -248,7 +248,7 @@ $R$ & ", panelA["r","p"], " & ", panelA["r","u"], " & ", panelA["r","r"], " \\\\
 \\begin{tabular}{lcccc}
 \\multicolumn{5}{l}{\\textbf{B.i. Variance Decomposition of $p$}} \\\\
 \\hline
-Horizon & SE & $p$ & $u$ & $R$ \\\\
+Horizon & SE & $p$ & $u$ & $r$ \\\\
 \\hline
 ", make_rows(panelB_p), "
 \\hline
@@ -259,7 +259,7 @@ Horizon & SE & $p$ & $u$ & $R$ \\\\
 \\begin{tabular}{lcccc}
 \\multicolumn{5}{l}{\\textbf{B.ii. Variance Decomposition of $u$}} \\\\
 \\hline
-Horizon & SE & $p$ & $u$ & $R$ \\\\
+Horizon & SE & $p$ & $u$ & $r$ \\\\
 \\hline
 ", make_rows(panelB_u), "
 \\hline
@@ -268,9 +268,9 @@ Horizon & SE & $p$ & $u$ & $R$ \\\\
 \\vspace{0.3cm}
 
 \\begin{tabular}{lcccc}
-\\multicolumn{5}{l}{\\textbf{B.iii. Variance Decomposition of $R$}} \\\\
+\\multicolumn{5}{l}{\\textbf{B.iii. Variance Decomposition of $r$}} \\\\
 \\hline
-Horizon & SE & $p$ & $u$ & $R$ \\\\
+Horizon & SE & $p$ & $u$ & $r$ \\\\
 \\hline
 ", make_rows(panelB_r), "
 \\hline
