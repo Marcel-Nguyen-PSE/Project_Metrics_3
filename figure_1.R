@@ -164,6 +164,14 @@ var_comp_p <- var_comp$p[c(1,4,8,12),]
 var_comp_u <- var_comp$u[c(1,4,8,12),]
 var_comp_r <- var_comp$r[c(1,4,8,12),]
 
+var_comp_comb <- bind_cols(
+  var_comp_p, var_comp_u, var_comp_r
+) %>%
+mutate(across(where(is.numeric), ~ round(.x, 2)))
+
+table1_var_comp <- tt(data.frame(var_comp_comb), rownames = FALSE, align = 'center')
+tt_save(table1_var_comp, 'table_1_var_decomp_comb.typ')
+
 ### Forecast errors
 
 fe <- predict(var_1, n.ahead = 12, ci = 0.95)
@@ -172,6 +180,14 @@ se_fe_p <- (fe$fcst$p[c(1,4,8,12), 'upper'] - fe$fcst$p[c(1,4,8,12), 'lower']) /
 se_fe_u <- (fe$fcst$u[c(1,4,8,12), 'upper'] - fe$fcst$u[c(1,4,8,12), 'lower']) / (2 *1.96)
 se_fe_r <- (fe$fcst$r[c(1,4,8,12), 'upper'] - fe$fcst$r[c(1,4,8,12), 'lower']) / (2 *1.96)
 
+fe_err_comb <- bind_cols(
+  se_fe_p, se_fe_u, se_fe_r
+) %>%
+mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
+mutate(horizon = c(1,4,8,12))
+
+table1_fe_err <- tt(data.frame(fe_err_comb), rownames = FALSE, align = 'center')
+tt_save(table1_fe_err, 'table_1_forecast_err.typ')
 
 
 
