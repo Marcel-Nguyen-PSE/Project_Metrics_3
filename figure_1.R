@@ -42,7 +42,7 @@ ffr <- fredr(series_id = "FEDFUNDS",
              observation_start = as.Date('1955-01-01'),
              observation_end   = as.Date('2019-12-31'))
 
-# Quarterly averages for monthly series (AI helped me redo this part)
+# Quarterly averages for monthly series 
 
 unrate_q <- unrate %>%
   mutate(date = floor_date(date, "quarter")) %>% 
@@ -172,8 +172,6 @@ se_fe_p <- (fe$fcst$p[c(1,4,8,12), 'upper'] - fe$fcst$p[c(1,4,8,12), 'lower']) /
 se_fe_u <- (fe$fcst$u[c(1,4,8,12), 'upper'] - fe$fcst$u[c(1,4,8,12), 'lower']) / (2 *1.96)
 se_fe_r <- (fe$fcst$r[c(1,4,8,12), 'upper'] - fe$fcst$r[c(1,4,8,12), 'lower']) / (2 *1.96)
 
-table1_panel2_p <- data.frame(
-  Forecast_Horizon = c(1,4,8,12),
-  Forecast_Standard_Errors = round(se_fe_p[c(1,4,8,12)],2)
-)
+
+
 
