@@ -26,6 +26,7 @@ library(vars)
 library(forecast)
 library(typstable)
 library(lubridate)
+library(zoo)
 
 fred_key <- Sys.getenv('FRED_API_KEY')
 
@@ -56,19 +57,19 @@ ffr_q <- ffr %>%
   group_by(date) %>%
   summarise(r = mean(value), .groups = "drop")
 
-# building the final data set : 3 VAR variables
+# final data set : 3 VAR variables
 
 macro <- gdpd %>%
   transmute(date, gdpd = value) %>%
   left_join(unrate_q, by = "date") %>%
   left_join(ffr_q, by = "date") %>%
   arrange(date) %>%
-  mutate(p = 400 * log(gdpd / lag(gdpd))) %>%    #annualized quaterly inflation
+  mutate(p = 400 * log(gdpd / lag(gdpd))) %>%    
   dplyr::select(date, p, u, r)
 
 ### Inflation variable 
 
 macro_1960_2000 <- macro %>%
   filter(date >= as.Date("1960-01-01"),
-         date <  as.Date("2001-01-01")) %>%      #keeps 1960:I to 2000:IV.
+         date <  as.Date("2001-01-01")) %>%     
   dplyr::select(p,u,r)
