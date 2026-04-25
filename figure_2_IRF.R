@@ -30,9 +30,7 @@ irf_var_1 <- irf(
 # Save IRF figure as PDF
 pdf("figure_1_irf_recursive_var.pdf", width = 10, height = 8)
 
-# Force a grid layout (3x3 like the paper)
 par(mfrow = c(3,3))
-
 plot(irf_var_1, plot.type = "single")
 
 dev.off()
