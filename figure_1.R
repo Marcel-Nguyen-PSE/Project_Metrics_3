@@ -195,5 +195,88 @@ mutate(horizon = c(1,4,8,12))
 table1_fe_err <- tt(data.frame(fe_err_comb), rownames = FALSE, align = 'center')
 tt_save(table1_fe_err, 'table_1_forecast_err.typ')
 
+horizons <- c(1, 4, 8, 12)
 
+panelA <- round(table_1, 2)
 
+panelB_p <- data.frame(
+  h = horizons,
+  se = round(se_fe_p, 2),
+  round(var_comp$p[horizons, ] * 100, 0)
+)
+
+panelB_u <- data.frame(
+  h = horizons,
+  se = round(se_fe_u, 2),
+  round(var_comp$u[horizons, ] * 100, 0)
+)
+
+panelB_r <- data.frame(
+  h = horizons,
+  se = round(se_fe_r, 2),
+  round(var_comp$r[horizons, ] * 100, 0)
+)
+
+make_rows <- function(df) {
+  paste0(
+    df$h, " & ", df$se, " & ", df$p, " & ", df$u, " & ", df$r, " \\\\",
+    collapse = "\n"
+  )
+}
+
+latex_code <- paste0(
+"\\begin{table}[!htbp]
+\\centering
+\\caption{VAR Descriptive Statistics for $(p,u,R)$}
+
+\\begin{tabular}{lccc}
+\\hline
+\\multicolumn{4}{l}{\\textbf{A. Granger-Causality Tests}} \\\\
+\\hline
+ & \\multicolumn{3}{c}{Dependent Variable} \\\\
+\\cline{2-4}
+Regressor & $p$ & $u$ & $R$ \\\\
+\\hline
+$p$ & ", panelA["p","p"], " & ", panelA["p","u"], " & ", panelA["p","r"], " \\\\
+$u$ & ", panelA["u","p"], " & ", panelA["u","u"], " & ", panelA["u","r"], " \\\\
+$R$ & ", panelA["r","p"], " & ", panelA["r","u"], " & ", panelA["r","r"], " \\\\
+\\hline
+\\end{tabular}
+
+\\vspace{0.3cm}
+
+\\begin{tabular}{lcccc}
+\\multicolumn{5}{l}{\\textbf{B.i. Variance Decomposition of $p$}} \\\\
+\\hline
+Horizon & SE & $p$ & $u$ & $R$ \\\\
+\\hline
+", make_rows(panelB_p), "
+\\hline
+\\end{tabular}
+
+\\vspace{0.3cm}
+
+\\begin{tabular}{lcccc}
+\\multicolumn{5}{l}{\\textbf{B.ii. Variance Decomposition of $u$}} \\\\
+\\hline
+Horizon & SE & $p$ & $u$ & $R$ \\\\
+\\hline
+", make_rows(panelB_u), "
+\\hline
+\\end{tabular}
+
+\\vspace{0.3cm}
+
+\\begin{tabular}{lcccc}
+\\multicolumn{5}{l}{\\textbf{B.iii. Variance Decomposition of $R$}} \\\\
+\\hline
+Horizon & SE & $p$ & $u$ & $R$ \\\\
+\\hline
+", make_rows(panelB_r), "
+\\hline
+\\end{tabular}
+
+\\end{table}"
+)
+
+writeLines(latex_code, "table_1_full.tex")
