@@ -28,8 +28,12 @@ irf_var_1 <- irf(
   ci = 0.66          #ci = 0.66 bec in Stock-Watson ±1 SE bands, ie 66% intervals.
 )
 
+jpeg("Replication/Figures/Fig_2/irf_var_1.jpeg",
+     width = 1800, height = 1800, res = 150)
 par(mfrow = c(3, 3))
-plot(irf_var_1, plot.type = 'multiple')
+plot(irf_var_1, plot.type = "single")
+dev.off()
+
 
 
 
