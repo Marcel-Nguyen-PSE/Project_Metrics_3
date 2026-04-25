@@ -25,9 +25,15 @@ library(urca)
 library(vars)
 library(forecast)
 library(typstable)
+library(lubridate)
 
 fred_key <- Sys.getenv('FRED_API_KEY')
 
+if (fred_key == "") {
+  stop("FRED_API_KEY is not set.")
+}
+
+fredr_set_key(fred_key)
 ######################################################### Main dataset using fred package and monthly obs.
 
 gdpd <- fredr(series_id = "GDPDEF",
@@ -54,24 +60,24 @@ ffr_q <- ffr %>%
   group_by(date) %>%
   summarise(r = mean(value), .groups = "drop")
 
-# Final data set
+# building the final data set : 3 VAR variables
 
 macro <- gdpd %>%
   transmute(date, gdpd = value) %>%
   left_join(unrate_q, by = "date") %>%
   left_join(ffr_q, by = "date") %>%
   arrange(date) %>%
-  mutate(p = 400 * log(gdpd / lag(gdpd))) %>%
+  mutate(p = 400 * log(gdpd / lag(gdpd))) %>%    #annualized quaterly inflation
   dplyr::select(date, p, u, r)
 
 ### Inflation variable 
 
 macro_1960_2000 <- macro %>%
   filter(date >= as.Date("1960-01-01"),
-         date <  as.Date("2001-01-01")) %>%
+         date <  as.Date("2001-01-01")) %>%      #keeps 1960:I to 2000:IV.
   dplyr::select(p,u,r)
 
-#### Reduced form VAR 
+#### Reduced form VAR : 4 lags and a constant.
 
 var_1 <- VAR(
   y = macro_1960_2000,
