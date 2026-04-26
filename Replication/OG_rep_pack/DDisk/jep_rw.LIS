@@ -1,0 +1,45 @@
+cal 1945 1 4
+all 0 2000:4
+compute nph = 8
+open data \jepvar\ddisk\jepvar.rat
+data(for=rats,compact=average) / gdpd fyff lhur
+set dp / = log(gdpd(t)/gdpd(t-1))
+set p / = 400*dp
+set r / = fyff(t)
+set u / = lhur(t)
+set pact = log(gdpd(t)/gdpd(t-nph))
+set pact = (400/nph)*pact
+compute nfest = 1960:1
+compute nlest = 2000:4
+compute nffcst = 1985:1
+compute nlfcst = 2000:4
+clear prw
+clear urw
+clear rrw
+set prw nffcst nlfcst = p(t)
+set urw nffcst nlfcst = u(t)
+set rrw nffcst nlfcst = r(t)
+
+*
+* -- Compute Forecast Errors
+*
+set eprw / = prw(t)-pact(t+nph)
+set eurw / = urw(t)-u(t+nph)
+set errw / = rrw(t)-r(t+nph)
+set eprw / = eprw(t)**2
+set eurw / = eurw(t)**2
+set errw / = errw(t)**2
+
+statistics(noprint) eprw /; compute cprw = sqrt(%mean)
+statistics(noprint) eurw /; compute curw = sqrt(%mean)
+statistics(noprint) errw /; compute crrw = sqrt(%mean)
+
+write 'prw' cprw
+prw
+      0.7465
+write 'urw' curw
+urw
+      1.1153
+write 'rrw' crrw
+rrw
+      2.1813

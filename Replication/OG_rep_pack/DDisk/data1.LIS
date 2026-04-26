@@ -1,0 +1,52 @@
+cal 1945 1 12
+all 2010:12
+dedit(new) jepvar.rat
+Editing data file "jepvar.rat"
+sou FYFF.rtd
+ieval nfirst = (1954:01)
+ieval nlast =  (2000:12)
+dis 'Loading FYFF as yy'
+Loading FYFF as yy
+data(unit=input) nfirst nlast yy
+include FYFF yy nfirst nlast 1
+   INTEREST RATE: FEDERAL FUNDS (EFFECTIVE) (% PER ANNUM,NSA)
+
+sou LHUR.rtd
+ieval nfirst = (1948:01)
+ieval nlast =  (2000:12)
+dis 'Loading LHUR as yy'
+Loading LHUR as yy
+data(unit=input) nfirst nlast yy
+include LHUR yy nfirst nlast 1
+   UNEMPLOYMENT RATE: ALL WORKERS, 16 YEARS & OVER (%,SA)
+
+save
+end 1
+
+
+Normal Completion. Halt at 1
+cal 1945 1 4
+all 2010:4
+
+sou GDPD.rtd
+ieval nfirst = (1947:01)
+ieval nlast =  (2000:04)
+dis 'Loading GDPD as yy'
+Loading GDPD as yy
+data(unit=input) nfirst nlast yy
+include GDPD yy nfirst nlast 1
+   GROSS DOMESTIC PRODUCT:IMPLICIT PRICE DEFLATOR(INDEX,92=100)(T7.1)
+
+save
+end 1
+
+
+Normal Completion. Halt at 1
+cal 1945 1 1
+all 2010:1
+save
+quit
+end
+
+
+Normal Completion

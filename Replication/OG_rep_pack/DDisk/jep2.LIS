@@ -1,0 +1,448 @@
+
+* ----------------------------------------------- @
+* -- Forward Looking Taylor Rule --
+cal 1945 1 4
+all 0 2000:4
+open data \jepvar\ddisk\jepvar.rat
+data(for=rats,compact=average) / gdpd fyff lhur
+set dp / = log(gdpd(t)/gdpd(t-1))
+set p / = 400*dp
+set r / = fyff(t)
+set u / = lhur(t)
+compute fp1 = 1.5
+compute fy1 = 0.5
+compute olaw=-2.5
+compute fu1=fy1*olaw
+* -- k=4 results
+
+compute pp=     0.47808371
+compute pu=    -0.98366589
+compute pr=    0.085929442
+
+compute up=      0.047163051
+compute uu=      1.4998803
+compute ur=      0.070519295
+
+compute fp2=fp1*pp+fu1*up
+compute fu2=fp1*pu+fu1*uu
+compute fr2=fp1*pr+fu1*ur;
+compute fp=fp2/(1-fr2)
+compute fu=fu2/(1-fr2)
+write fp
+      0.6861
+write fu
+     -3.4927
+
+
+set ra / = r-fp*p-fu*u;
+
+* -- VAR --
+COMPUTE  NEQN   = 3                                               ;*<<<<<<
+COMPUTE  nlags = 4                                               ;*<<<<<<
+COMPUTE  NSTEPS = 25
+compute nfest = 1960:1
+compute nlest = 2000:4
+compute ndraws = 500
+seed 807687
+
+** Set Up identities
+** Set Up identities
+equation(identity) 4 r
+# ra p u
+associate 4
+# 1 fp fu
+
+
+linreg(noprint,define=1,frml=raeq) ra nfest nlest resra
+# constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+linreg(noprint,define=2,frml=peq) p nfest nlest resp
+# constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+linreg(noprint,define=3,frml=ueq) u nfest nlest resu
+# constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+
+vcv(noprint,matrix=v)
+# resra resp resu
+
+vcv(noprint,matrix=vm)
+# resra resp resu
+
+impulse(noprint) neqn+1 nsteps 1 V
+# 1 impra 1 1
+# 2 impp 1 2
+# 3 impu 1 3
+# 4 impr 1
+
+smpl 1 nsteps
+compute std = impr(1)
+set impp / = impp(t)/std
+set impu / = impu(t)/std
+set impr / = impr(t)/std
+set imprr / = impr-impp
+print(nodates) 1 nsteps impp impu imprr impr
+
+
+ ENTRY        IMPP            IMPU            IMPRR           IMPR
+      1  -1.647196773234  0.302995564448  2.647196773234  1.000000000000
+      2  -0.956981134488  0.395818706301  1.288384865173  0.331403730685
+      3  -0.675450572329  0.485317157349  0.102768251389 -0.572682320940
+      4  -1.015779624126  0.477560623846  0.209750307567 -0.806029316559
+      5  -1.302773602590  0.421855550853  0.715970865188 -0.586802737403
+      6  -1.212875966914  0.341721762290  0.524331865087 -0.688544101827
+      7  -1.125990887589  0.255017368397  0.217726594589 -0.908264293000
+      8  -1.165032313281  0.157261462312  0.253309682785 -0.911722630497
+      9  -1.185114197332  0.055893484035  0.382120863421 -0.802993333911
+     10  -1.132831724675 -0.037301665572  0.358390163742 -0.774441560933
+     11  -1.078029915231 -0.118030323722  0.288214648697 -0.789815266534
+     12  -1.046991827170 -0.188175097958  0.281227051208 -0.765764775962
+     13  -1.012867490409 -0.248062705624  0.289422729770 -0.723444760639
+     14  -0.966913780687 -0.296628217023  0.260685605568 -0.706228175119
+     15  -0.922483115446 -0.334568372714  0.216095134663 -0.706387980783
+     16  -0.883869779655 -0.364023992675  0.180425351156 -0.703444428499
+     17  -0.845523974676 -0.386688535654  0.146220826283 -0.699303148393
+     18  -0.805811106865 -0.403630117862  0.104254524114 -0.701556582751
+     19  -0.767076691385 -0.415980208911  0.059587556541 -0.707489134844
+     20  -0.729674314212 -0.424929302351  0.017923299336 -0.711751014876
+     21  -0.692240499621 -0.431357325522 -0.021584402231 -0.713824901852
+     22  -0.654403103002 -0.435813019561 -0.060310517499 -0.714713620501
+     23  -0.616583342412 -0.438696113677 -0.097033314940 -0.713616657352
+     24  -0.578797629655 -0.440305813267 -0.130602486954 -0.709400116609
+     25  -0.540799801671 -0.440806033932 -0.161239470333 -0.702039272004
+
+
+
+
+* -- Main Model: SET ORDER HERE (%%)
+group(vcv=vm) mainmod $
+raeq>>f_ra $
+peq>>f_p $
+ueq>>f_u
+
+
+**************************
+set impu1 1 nsteps = 0
+set impp1 1 nsteps = 0
+set impr1 1 nsteps = 0
+set imprr1 1 nsteps = 0
+set impu2 1 nsteps = 0
+set impp2 1 nsteps = 0
+set impr2 1 nsteps = 0
+set imprr2 1 nsteps = 0
+
+* Loop for Standard Error Bands
+*
+do draws=1,ndraws
+(01.0032)
+(01.0032)    smpl nfest nlest
+(01.0055)
+(01.0055)    simulate(model=mainmod) 3 * * vm
+(01.0087)
+(01.0087)    set u nfest nlest = f_u
+(01.0133)    set p nfest nlest = f_p
+(01.0179)    set ra nfest nlest = f_ra
+(01.0225)
+(01.0225) linreg(noprint,define=1) ra nfest nlest resra
+(01.0280) # constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+(01.0433) linreg(noprint,define=2) p nfest nlest resp
+(01.0488) # constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+(01.0641) linreg(noprint,define=3) u nfest nlest resu
+(01.0696) # constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+(01.0849)
+(01.0849) vcv(noprint,matrix=v)
+(01.0866) # resra resp resu
+(01.0899)
+(01.0899) impulse(noprint) neqn+1 nsteps 1 V
+(01.0943) # 1 impra 1 1
+(01.0974) # 2 impp 1 2
+(01.1005) # 3 impu 1 3
+(01.1036) # 4 impr 1
+(01.1061)
+(01.1061) smpl 1 nsteps
+(01.1080) compute std = impr(1)
+(01.1102) set impp / = impp(t)/std
+(01.1142) set impu / = impu(t)/std
+(01.1182) set impr / = impr(t)/std
+(01.1222) set imprr / = impr-impp
+(01.1261)
+(01.1261) set impp1 / = impp1(t)+impp(t)
+(01.1306) set impu1 / = impu1(t)+impu(t)
+(01.1351) set impr1 / = impr1(t)+impr(t)
+(01.1396) set imprr1 / = imprr1(t)+imprr(t)
+(01.1441) set impp2 / = impp2(t)+impp(t)**2
+(01.1491) set impu2 / = impu2(t)+impu(t)**2
+(01.1541) set impr2 / = impr2(t)+impr(t)**2
+(01.1591) set imprr2 / = imprr2(t)+imprr(t)**2
+(01.1641)
+(01.1641)
+(01.1641) end do draws
+smpl 1 nsteps
+set impp1 / = impp1(t)/ndraws
+set impu1 / = impu1(t)/ndraws
+set impr1 / = impr1(t)/ndraws
+set imprr1 / = imprr1(t)/ndraws
+set impp2 / = impp2(t)/ndraws
+set impu2 / = impu2(t)/ndraws
+set impr2 / = impr2(t)/ndraws
+set imprr2 / = imprr2(t)/ndraws
+set imppvar / = impp2(t)-impp1(t)**2
+set impuvar / = impu2(t)-impu1(t)**2
+set imprvar / = impr2(t)-impr1(t)**2
+set imprrvar / = imprr2(t)-imprr1(t)**2
+set imppse / = sqrt(imppvar(t))
+set impuse / = sqrt(impuvar(t))
+set imprse / = sqrt(imprvar(t))
+set imprrse / = sqrt(imprrvar(t))
+
+
+print(nodates) 1 nsteps imppse impuse imprrse imprse
+
+
+ ENTRY       IMPPSE          IMPUSE          IMPRRSE         IMPRSE
+      1   0.525297761670  0.119462520150  0.525297761670  0.000000000000
+      2   0.450913355462  0.168023779741  0.351710006732  0.304107201659
+      3   0.358750015889  0.192480918636  0.373995148218  0.501718482777
+      4   0.408206346728  0.188789093488  0.373309783071  0.560407405974
+      5   0.464425773154  0.170991656316  0.301604950477  0.504555932594
+      6   0.451939894405  0.151595102449  0.306895024861  0.502553856416
+      7   0.427197365883  0.138119853790  0.319324564359  0.540537333430
+      8   0.432693500142  0.129768591857  0.330002584496  0.547491251147
+      9   0.434812997116  0.131447122385  0.309219169139  0.515989301612
+     10   0.427653112898  0.141374429126  0.299256143092  0.490909596682
+     11   0.418023557245  0.154495701198  0.295630090236  0.481589440098
+     12   0.413241051991  0.168172749929  0.295316555403  0.473723236189
+     13   0.407413924182  0.181217703145  0.284206914275  0.459657633508
+     14   0.400699495374  0.192119310228  0.272696217282  0.446144411135
+     15   0.394733731834  0.200334728457  0.265124328349  0.437808460212
+     16   0.389923271275  0.206244612871  0.259597579085  0.432659214225
+     17   0.384281824259  0.210538425046  0.252656719312  0.428394988744
+     18   0.378226500614  0.213735065304  0.247422686422  0.425122030400
+     19   0.372529579580  0.216152722994  0.245236867596  0.423135726973
+     20   0.367053778323  0.217958340398  0.245037077145  0.422161257926
+     21   0.360898859794  0.219312156788  0.245558124125  0.421630783726
+     22   0.354216137938  0.220340813583  0.246771403727  0.420771200716
+     23   0.347507817516  0.221095218360  0.248311081466  0.418987535372
+     24   0.340792647831  0.221560214267  0.249878922132  0.416285771722
+     25   0.333743593765  0.221742867784  0.251347378527  0.412884409600
+
+
+
+
+end 1
+
+
+Normal Completion. Halt at 1
+* ----------------------------------------------- @
+* -- Backward Looking Taylor Rule
+cal 45 1 4
+all 0 2000:4
+open data \jepvar\ddisk\jepvar.rat
+data(for=rats,compact=average) / gdpd fyff lhur
+set dp / = log(gdpd(t)/gdpd(t-1))
+set p / = 400*dp
+set r / = fyff(t)
+set u / = lhur(t)
+compute np=4;
+compute fp = 1.5/np
+compute fy = 0.5/np
+compute olaw=-2.5
+compute fu=fy*olaw
+write fp
+      0.3750
+write fu
+     -0.3125
+
+
+set ra / = r-fp*p-fu*u;
+
+* -- VAR --
+COMPUTE  NEQN   = 3                                               ;*<<<<<<
+COMPUTE  nlags = 4                                               ;*<<<<<<
+COMPUTE  NSTEPS = 25
+compute nfest = 1960:1
+compute nlest = 2000:4
+compute ndraws = 500
+seed 807687
+
+** Set Up identities
+** Set Up identities
+equation(identity) 4 r
+# ra p u
+associate 4
+# 1 fp fu
+
+
+linreg(noprint,define=1,frml=raeq) ra nfest nlest resra
+# constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+linreg(noprint,define=2,frml=peq) p nfest nlest resp
+# constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+linreg(noprint,define=3,frml=ueq) u nfest nlest resu
+# constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+
+vcv(noprint,matrix=v)
+# resra resp resu
+
+vcv(noprint,matrix=vm)
+# resra resp resu
+
+impulse(noprint) neqn+1 nsteps 1 V
+# 1 impra 1 1
+# 2 impp 1 2
+# 3 impu 1 3
+# 4 impr 1
+
+smpl 1 nsteps
+compute std = impr(1)
+set impp / = impp(t)/std
+set impu / = impu(t)/std
+set impr / = impr(t)/std
+set imprr / = impr-impp
+print(nodates) 1 nsteps impp impu imprr impr
+
+
+ ENTRY        IMPP            IMPU            IMPRR           IMPR
+      1  -0.372296850111 -0.098616480523  1.372296850111  1.000000000000
+      2   0.116891368286 -0.160162514027  0.950562781523  1.067454149808
+      3   0.033057909478 -0.118433178729  0.613105785921  0.646163695399
+      4  -0.056776559848 -0.074735770166  0.646850481508  0.590073921660
+      5  -0.073518457229 -0.026550598732  0.767706578527  0.694188121298
+      6  -0.039859983888  0.020380669239  0.612381392856  0.572521408968
+      7  -0.085107015089  0.069320697579  0.476375784623  0.391268769534
+      8  -0.147935381421  0.107993167141  0.441947718286  0.294012336866
+      9  -0.177850869735  0.133766854456  0.407334040706  0.229483170971
+     10  -0.195998777320  0.148571721786  0.337144199496  0.141145422176
+     11  -0.225271717714  0.153949289953  0.285790120457  0.060518402742
+     12  -0.253233916842  0.150369858488  0.263302831738  0.010068914896
+     13  -0.269089433751  0.139562776360  0.242987406924 -0.026102026827
+     14  -0.278698503399  0.123862155694  0.219482482103 -0.059216021296
+     15  -0.287500316114  0.105071045422  0.203302337469 -0.084197978645
+     16  -0.293509717172  0.084547158126  0.194082166453 -0.099427550719
+     17  -0.295151403729  0.063553293466  0.184837656113 -0.110313747616
+     18  -0.294214217474  0.043110996846  0.174290764827 -0.119923452648
+     19  -0.292193933154  0.023850924630  0.164452977362 -0.127740955792
+     20  -0.288968485488  0.006126772264  0.154955077994 -0.134013407494
+     21  -0.284445242474 -0.009864581061  0.144313536141 -0.140131706333
+     22  -0.279124389439 -0.024074255838  0.132465673073 -0.146658716366
+     23  -0.273362299158 -0.036585565599  0.120055776764 -0.153306522394
+     24  -0.267152645541 -0.047551033195  0.107219930388 -0.159932715153
+     25  -0.260480013986 -0.057144437275  0.093882112394 -0.166597901592
+
+
+
+
+* -- Main Model: SET ORDER HERE (%%)
+group(vcv=vm) mainmod $
+raeq>>f_ra $
+peq>>f_p $
+ueq>>f_u
+
+
+**************************
+set impu1 1 nsteps = 0
+set impp1 1 nsteps = 0
+set impr1 1 nsteps = 0
+set imprr1 1 nsteps = 0
+set impu2 1 nsteps = 0
+set impp2 1 nsteps = 0
+set impr2 1 nsteps = 0
+set imprr2 1 nsteps = 0
+
+* Loop for Standard Error Bands
+*
+do draws=1,ndraws
+(01.0032)
+(01.0032)    smpl nfest nlest
+(01.0055)
+(01.0055)    simulate(model=mainmod) 3 * * vm
+(01.0087)
+(01.0087)    set u nfest nlest = f_u
+(01.0133)    set p nfest nlest = f_p
+(01.0179)    set ra nfest nlest = f_ra
+(01.0225)
+(01.0225) linreg(noprint,define=1) ra nfest nlest resra
+(01.0280) # constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+(01.0433) linreg(noprint,define=2) p nfest nlest resp
+(01.0488) # constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+(01.0641) linreg(noprint,define=3) u nfest nlest resu
+(01.0696) # constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+(01.0849)
+(01.0849) vcv(noprint,matrix=v)
+(01.0866) # resra resp resu
+(01.0899)
+(01.0899) impulse(noprint) neqn+1 nsteps 1 V
+(01.0943) # 1 impra 1 1
+(01.0974) # 2 impp 1 2
+(01.1005) # 3 impu 1 3
+(01.1036) # 4 impr 1
+(01.1061)
+(01.1061) smpl 1 nsteps
+(01.1080) compute std = impr(1)
+(01.1102) set impp / = impp(t)/std
+(01.1142) set impu / = impu(t)/std
+(01.1182) set impr / = impr(t)/std
+(01.1222) set imprr / = impr-impp
+(01.1261)
+(01.1261) set impp1 / = impp1(t)+impp(t)
+(01.1306) set impu1 / = impu1(t)+impu(t)
+(01.1351) set impr1 / = impr1(t)+impr(t)
+(01.1396) set imprr1 / = imprr1(t)+imprr(t)
+(01.1441) set impp2 / = impp2(t)+impp(t)**2
+(01.1491) set impu2 / = impu2(t)+impu(t)**2
+(01.1541) set impr2 / = impr2(t)+impr(t)**2
+(01.1591) set imprr2 / = imprr2(t)+imprr(t)**2
+(01.1641)
+(01.1641)
+(01.1641) end do draws
+smpl 1 nsteps
+set impp1 / = impp1(t)/ndraws
+set impu1 / = impu1(t)/ndraws
+set impr1 / = impr1(t)/ndraws
+set imprr1 / = imprr1(t)/ndraws
+set impp2 / = impp2(t)/ndraws
+set impu2 / = impu2(t)/ndraws
+set impr2 / = impr2(t)/ndraws
+set imprr2 / = imprr2(t)/ndraws
+set imppvar / = impp2(t)-impp1(t)**2
+set impuvar / = impu2(t)-impu1(t)**2
+set imprvar / = impr2(t)-impr1(t)**2
+set imprrvar / = imprr2(t)-imprr1(t)**2
+set imppse / = sqrt(imppvar(t))
+set impuse / = sqrt(impuvar(t))
+set imprse / = sqrt(imprvar(t))
+set imprrse / = sqrt(imprrvar(t))
+
+print(nodates) 1 nsteps imppse impuse imprrse imprse
+
+
+ ENTRY       IMPPSE          IMPUSE          IMPRRSE         IMPRSE
+      1   0.109983602238  0.022728113955  0.109983602238  0.000000000000
+      2   0.120849446572  0.040381343584  0.132430535371  0.101523363231
+      3   0.116089142465  0.054636859759  0.146248367887  0.156859736992
+      4   0.134714235039  0.061222263116  0.159106794712  0.181830082026
+      5   0.130787866663  0.060299781274  0.141704034653  0.173925084746
+      6   0.133226545708  0.059241244785  0.145478083662  0.178202648654
+      7   0.138469832877  0.059786504354  0.148066587604  0.192366223261
+      8   0.144413063988  0.060193866885  0.148574193556  0.196930247063
+      9   0.144937479708  0.061340767545  0.144268643628  0.194786712431
+     10   0.146337299640  0.063093134766  0.139770830487  0.192129292803
+     11   0.146559166432  0.064484350824  0.134146334108  0.187850767326
+     12   0.146139122105  0.065829109277  0.129028044252  0.182250653058
+     13   0.144489345833  0.067433730484  0.123325453130  0.175989626811
+     14   0.142807442377  0.069007043102  0.117102633901  0.169069598785
+     15   0.140992157815  0.070446747369  0.111828746837  0.162255313430
+     16   0.139193169608  0.071811384661  0.107749211819  0.156440037520
+     17   0.137261086164  0.073012895273  0.104310153211  0.151912018055
+     18   0.135512057917  0.073893240486  0.101221432687  0.148479276016
+     19   0.134009432267  0.074427393961  0.098745655367  0.145851476280
+     20   0.132573260678  0.074647104612  0.096641309506  0.143848002851
+     21   0.131025742651  0.074619755678  0.094751050891  0.142453332161
+     22   0.129418068733  0.074447288704  0.093068043084  0.141527317914
+     23   0.127783458495  0.074240214085  0.091661337680  0.140809743987
+     24   0.126053251496  0.074066783909  0.090447801157  0.140193169968
+     25   0.124160136138  0.073953347943  0.089409926002  0.139724567189
+
+
+
+
+end 1
+
+
+Normal Completion. Halt at 1

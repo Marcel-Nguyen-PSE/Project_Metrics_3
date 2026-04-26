@@ -1,0 +1,318 @@
+
+* ----------------------------------------------- @
+* -- Forward Looking Taylor Rule -- 
+cal 1945 1 4
+all 0 2000:4
+open data \jepvar\ddisk\jepvar.rat
+data(for=rats,compact=average) / gdpd fyff lhur
+set dp / = log(gdpd(t)/gdpd(t-1))
+set p / = 400*dp
+set r / = fyff(t)
+set u / = lhur(t)
+compute fp1 = 1.5
+compute fy1 = 0.5
+compute olaw=-2.5
+compute fu1=fy1*olaw
+* -- k=4 results 
+
+compute pp=     0.47808371     
+compute pu=    -0.98366589     
+compute pr=    0.085929442     
+
+compute up=      0.047163051  
+compute uu=      1.4998803 
+compute ur=      0.070519295  
+
+compute fp2=fp1*pp+fu1*up
+compute fu2=fp1*pu+fu1*uu
+compute fr2=fp1*pr+fu1*ur;
+compute fp=fp2/(1-fr2)
+compute fu=fu2/(1-fr2)
+write fp
+write fu
+
+
+set ra / = r-fp*p-fu*u;
+
+* -- VAR -- 
+COMPUTE  NEQN   = 3                                               ;*<<<<<<
+COMPUTE  nlags = 4                                               ;*<<<<<<
+COMPUTE  NSTEPS = 25  
+compute nfest = 1960:1
+compute nlest = 2000:4 
+compute ndraws = 500
+seed 807687
+
+** Set Up identities
+** Set Up identities
+equation(identity) 4 r
+# ra p u
+associate 4
+# 1 fp fu
+
+
+linreg(noprint,define=1,frml=raeq) ra nfest nlest resra
+# constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+linreg(noprint,define=2,frml=peq) p nfest nlest resp
+# constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+linreg(noprint,define=3,frml=ueq) u nfest nlest resu
+# constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+
+vcv(noprint,matrix=v)
+# resra resp resu
+
+vcv(noprint,matrix=vm)
+# resra resp resu
+
+impulse(noprint) neqn+1 nsteps 1 V
+# 1 impra 1 1 
+# 2 impp 1 2 
+# 3 impu 1 3
+# 4 impr 1 
+
+smpl 1 nsteps
+compute std = impr(1)
+set impp / = impp(t)/std
+set impu / = impu(t)/std
+set impr / = impr(t)/std
+set imprr / = impr-impp
+print(nodates) 1 nsteps impp impu imprr impr
+
+
+* -- Main Model: SET ORDER HERE (%%)
+group(vcv=vm) mainmod $
+raeq>>f_ra $
+peq>>f_p $
+ueq>>f_u 
+
+
+**************************
+set impu1 1 nsteps = 0
+set impp1 1 nsteps = 0
+set impr1 1 nsteps = 0
+set imprr1 1 nsteps = 0
+set impu2 1 nsteps = 0
+set impp2 1 nsteps = 0
+set impr2 1 nsteps = 0
+set imprr2 1 nsteps = 0
+
+* Loop for Standard Error Bands
+*
+do draws=1,ndraws
+
+   smpl nfest nlest
+
+   simulate(model=mainmod) 3 * * vm
+   
+   set u nfest nlest = f_u
+   set p nfest nlest = f_p
+   set ra nfest nlest = f_ra
+
+linreg(noprint,define=1) ra nfest nlest resra
+# constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+linreg(noprint,define=2) p nfest nlest resp
+# constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+linreg(noprint,define=3) u nfest nlest resu
+# constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+
+vcv(noprint,matrix=v)
+# resra resp resu
+
+impulse(noprint) neqn+1 nsteps 1 V
+# 1 impra 1 1 
+# 2 impp 1 2 
+# 3 impu 1 3
+# 4 impr 1 
+
+smpl 1 nsteps
+compute std = impr(1)
+set impp / = impp(t)/std
+set impu / = impu(t)/std
+set impr / = impr(t)/std
+set imprr / = impr-impp
+
+set impp1 / = impp1(t)+impp(t)
+set impu1 / = impu1(t)+impu(t)
+set impr1 / = impr1(t)+impr(t)
+set imprr1 / = imprr1(t)+imprr(t)
+set impp2 / = impp2(t)+impp(t)**2
+set impu2 / = impu2(t)+impu(t)**2
+set impr2 / = impr2(t)+impr(t)**2
+set imprr2 / = imprr2(t)+imprr(t)**2
+
+
+end do draws
+smpl 1 nsteps
+set impp1 / = impp1(t)/ndraws
+set impu1 / = impu1(t)/ndraws
+set impr1 / = impr1(t)/ndraws
+set imprr1 / = imprr1(t)/ndraws
+set impp2 / = impp2(t)/ndraws
+set impu2 / = impu2(t)/ndraws
+set impr2 / = impr2(t)/ndraws
+set imprr2 / = imprr2(t)/ndraws
+set imppvar / = impp2(t)-impp1(t)**2
+set impuvar / = impu2(t)-impu1(t)**2
+set imprvar / = impr2(t)-impr1(t)**2
+set imprrvar / = imprr2(t)-imprr1(t)**2
+set imppse / = sqrt(imppvar(t))
+set impuse / = sqrt(impuvar(t))
+set imprse / = sqrt(imprvar(t))
+set imprrse / = sqrt(imprrvar(t))
+
+
+print(nodates) 1 nsteps imppse impuse imprrse imprse
+
+
+end 1
+* ----------------------------------------------- @
+* -- Backward Looking Taylor Rule
+cal 45 1 4
+all 0 2000:4
+open data \jepvar\ddisk\jepvar.rat
+data(for=rats,compact=average) / gdpd fyff lhur
+set dp / = log(gdpd(t)/gdpd(t-1))
+set p / = 400*dp
+set r / = fyff(t)
+set u / = lhur(t)
+compute np=4;
+compute fp = 1.5/np
+compute fy = 0.5/np
+compute olaw=-2.5
+compute fu=fy*olaw
+write fp
+write fu
+
+
+set ra / = r-fp*p-fu*u;
+
+* -- VAR -- 
+COMPUTE  NEQN   = 3                                               ;*<<<<<<
+COMPUTE  nlags = 4                                               ;*<<<<<<
+COMPUTE  NSTEPS = 25  
+compute nfest = 1960:1
+compute nlest = 2000:4 
+compute ndraws = 500
+seed 807687
+
+** Set Up identities
+** Set Up identities
+equation(identity) 4 r
+# ra p u
+associate 4
+# 1 fp fu
+
+
+linreg(noprint,define=1,frml=raeq) ra nfest nlest resra
+# constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+linreg(noprint,define=2,frml=peq) p nfest nlest resp
+# constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+linreg(noprint,define=3,frml=ueq) u nfest nlest resu
+# constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+
+vcv(noprint,matrix=v)
+# resra resp resu
+
+vcv(noprint,matrix=vm)
+# resra resp resu
+
+impulse(noprint) neqn+1 nsteps 1 V
+# 1 impra 1 1 
+# 2 impp 1 2 
+# 3 impu 1 3
+# 4 impr 1 
+
+smpl 1 nsteps
+compute std = impr(1)
+set impp / = impp(t)/std
+set impu / = impu(t)/std
+set impr / = impr(t)/std
+set imprr / = impr-impp
+print(nodates) 1 nsteps impp impu imprr impr
+
+
+* -- Main Model: SET ORDER HERE (%%)
+group(vcv=vm) mainmod $
+raeq>>f_ra $
+peq>>f_p $
+ueq>>f_u 
+
+
+**************************
+set impu1 1 nsteps = 0
+set impp1 1 nsteps = 0
+set impr1 1 nsteps = 0
+set imprr1 1 nsteps = 0
+set impu2 1 nsteps = 0
+set impp2 1 nsteps = 0
+set impr2 1 nsteps = 0
+set imprr2 1 nsteps = 0
+
+* Loop for Standard Error Bands
+*
+do draws=1,ndraws
+
+   smpl nfest nlest
+
+   simulate(model=mainmod) 3 * * vm
+   
+   set u nfest nlest = f_u
+   set p nfest nlest = f_p
+   set ra nfest nlest = f_ra
+
+linreg(noprint,define=1) ra nfest nlest resra
+# constant p{1 to nlags} u{1 to nlags} ra{1 to nlags}
+linreg(noprint,define=2) p nfest nlest resp
+# constant p{1 to nlags} u{1 to nlags} ra{0 to nlags}
+linreg(noprint,define=3) u nfest nlest resu
+# constant p{0 to nlags} u{1 to nlags} ra{0 to nlags}
+
+vcv(noprint,matrix=v)
+# resra resp resu
+
+impulse(noprint) neqn+1 nsteps 1 V
+# 1 impra 1 1 
+# 2 impp 1 2 
+# 3 impu 1 3
+# 4 impr 1 
+
+smpl 1 nsteps
+compute std = impr(1)
+set impp / = impp(t)/std
+set impu / = impu(t)/std
+set impr / = impr(t)/std
+set imprr / = impr-impp
+
+set impp1 / = impp1(t)+impp(t)
+set impu1 / = impu1(t)+impu(t)
+set impr1 / = impr1(t)+impr(t)
+set imprr1 / = imprr1(t)+imprr(t)
+set impp2 / = impp2(t)+impp(t)**2
+set impu2 / = impu2(t)+impu(t)**2
+set impr2 / = impr2(t)+impr(t)**2
+set imprr2 / = imprr2(t)+imprr(t)**2
+
+
+end do draws
+smpl 1 nsteps
+set impp1 / = impp1(t)/ndraws
+set impu1 / = impu1(t)/ndraws
+set impr1 / = impr1(t)/ndraws
+set imprr1 / = imprr1(t)/ndraws
+set impp2 / = impp2(t)/ndraws
+set impu2 / = impu2(t)/ndraws
+set impr2 / = impr2(t)/ndraws
+set imprr2 / = imprr2(t)/ndraws
+set imppvar / = impp2(t)-impp1(t)**2
+set impuvar / = impu2(t)-impu1(t)**2
+set imprvar / = impr2(t)-impr1(t)**2
+set imprrvar / = imprr2(t)-imprr1(t)**2
+set imppse / = sqrt(imppvar(t))
+set impuse / = sqrt(impuvar(t))
+set imprse / = sqrt(imprvar(t))
+set imprrse / = sqrt(imprrvar(t))
+
+print(nodates) 1 nsteps imppse impuse imprrse imprse
+
+
+end 1

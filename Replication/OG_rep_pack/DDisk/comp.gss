@@ -1,0 +1,44 @@
+/* -- Estimate Companion Form -- */
+n=1999-1955+1;
+n=n*4;
+load s[n,3]=pur.asc;
+t1=21;
+t2=n;
+varlag=4;
+#include var.prc;
+{c,p,seps}=varest1(s,t1,t2,varlag);
+{c,phi,seps}=compest(s,t1,t2,varlag);
+@ -- Coefficients on Contemporaneious values
+     Averages of different forecasting horizons @
+
+output file = comp.out reset; output on;
+k=1; do while k <= 4;
+ f=eye(rows(phi));
+ i=1; do while i <= k;
+  f=phi*f;
+ i=i+1; endo;
+ lp=zeros(1,rows(phi));
+ lur=zeros(1,rows(phi));
+ lr=zeros(1,rows(phi));
+ j=1; do while j <= k;
+  ii=3*(j-1);
+  lp[1,ii+1]=1;
+  lur[1,ii+2]=1;
+  lr[1,ii+3]=1;
+ j=j+1; endo;
+ lp=lp./k;
+ lur=lur./k;
+ lr=lr./k;
+ "Results for k = ";;k;
+ "Inflation";;
+ a=lp*f;
+ a[1,1:3]';
+ "Unemployment Rate";;
+ a=lur*f;
+ a[1,1:3]';
+ "Interest Rates";;
+ a=lr*f;
+ a[1,1:3]';
+k=k+1; endo;
+ 
+output off;
