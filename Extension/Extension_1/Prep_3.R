@@ -77,8 +77,8 @@ macro <- gdpd %>%
 
 macro_us <- macro %>%
   filter(date >= as.Date("1960-01-01"),
-         date <  as.Date("2001-01-01")) %>%     
-  dplyr::select(p,u,r)
+         date <  as.Date("2019-01-01")) %>%     
+  dplyr::select(date, p,u,r)
 
 
 ### Canada 
@@ -128,11 +128,16 @@ macro_can <- gdpd_can %>%
   ) %>%
   left_join(unrate_q_can, by = "date") %>%
   left_join(ffr_q_can, by = "date") %>%
-  left_join(exr_q_can, by ='date')
+  left_join(exr_q_can, by ='date') %>%
   arrange(date) %>%
   mutate(
     p_can = 400 * log(gdpd_can / lag(gdpd_can))
   ) %>%
   dplyr::select(date, p_can, u_can, r_can) %>%
   filter(date <= as.Date('2019-12-31'))
+
+macro_can_us %>%
+  right_join(macro_us, by = 'date')
+
+
 
