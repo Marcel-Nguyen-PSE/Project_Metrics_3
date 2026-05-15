@@ -27,6 +27,9 @@ library(forecast)
 library(typstable)
 library(lubridate)
 library(zoo)
+library(gridExtra)
+library(grid)
+
 
 fred_key <- Sys.getenv('FRED_API_KEY')
 
@@ -73,3 +76,6 @@ macro_1960_2000 <- macro %>%
   filter(date >= as.Date("1960-01-01"),
          date <  as.Date("2001-01-01")) %>%     
   dplyr::select(p,u,r)
+
+
+sum(is.na(macro_1960_2000))

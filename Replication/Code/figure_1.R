@@ -1,14 +1,15 @@
 
-#### Reduced form VAR 
+#########################################################
+# Load objects from preliminaries
+#########################################################
 
-var_1 <- VAR(
-  y = macro_1960_2000,
-  p = 4, 
-  type = 'const'
+var_1 <- readRDS(
+  "Replication/R_objects/var_1.rds"
 )
 
-summary(var_1)
-
+macro_1960_2000 <- readRDS(
+  "Replication/R_objects/macro_1960_2000.rds"
+)
 ###### VAR Descriptive statistics (Table 1) 
 
 ### Panel A : Manual Granger Causality table -> get all p-values from each sub-regression
