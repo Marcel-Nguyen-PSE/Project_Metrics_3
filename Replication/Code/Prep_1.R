@@ -78,4 +78,3 @@ macro_1960_2000 <- macro %>%
   dplyr::select(p,u,r)
 
 
-sum(is.na(macro_1960_2000))

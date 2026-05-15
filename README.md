@@ -22,3 +22,7 @@ IRFs are computed using the same recursive ordering and horizon, but plotted usi
 26/04/26: I try to reproduce the figure 3 cont. I forgot to use VAR predictions for forward and not actual future observations...
 
 30/04/26 "...
+
+15/05/26: I revised the fig 2 (fig 3) replication in order to take the desired variables instead of present, much more convincing output but still different.
+
+
