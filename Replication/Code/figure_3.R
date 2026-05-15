@@ -1,15 +1,21 @@
+pi_star <- 2
+u_star  <- mean(macro_1960_2000$u, na.rm = TRUE)  # add this
+r_star  <- 2
+
 taylor_backward <- macro_1960_2000 %>%
   mutate(
-    pol = r - 1.5 * lag(rollmean(p, 4, fill = NA, align = 'right'), 1) +
-              1.25 * lag(rollmean(u, 4, fill = NA, align = 'right'), 1)
+    pi_bar = rollmean(p, 4, fill = NA, align = "right"),
+    u_bar  = rollmean(u, 4, fill = NA, align = "right"),
+    pol = r - (r_star + 1.5 * (lag(pi_bar, 1) - pi_star) - 1.25 * (lag(u_bar, 1) - u_star))
   ) %>%
   drop_na() %>%
-  dplyr::select(p, u, pol)  
+  dplyr::select(p, u, pol)
 
 taylor_forward <- macro_1960_2000 %>%
   drop_na() %>%
   mutate(pi_f4 = NA_real_,
-         u_f4  = NA_real_)
+         u_f4  = NA_real_) 
+  
 
 for (t in 20:nrow(taylor_forward)) {
   f <- predict(VAR(taylor_forward[1:t, c("p", "u", "r")], p = 4, type = "const"),
@@ -20,7 +26,7 @@ for (t in 20:nrow(taylor_forward)) {
 
 taylor_forward <- taylor_forward %>%
   mutate(
-    pol = r - 1.5 * pi_f4 + 1.25 * u_f4
+    pol = r - (r_star + 1.5 * (pi_f4 - pi_star) - 1.25 * (u_f4 - u_star))
   ) %>%
   drop_na() %>%
   dplyr::select(p, u, pol)
@@ -57,6 +63,8 @@ for (i in seq_along(responses)) {
 }
 
 dev.off()
+
+
 
 
 
