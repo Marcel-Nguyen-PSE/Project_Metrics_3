@@ -136,8 +136,66 @@ macro_can <- gdpd_can %>%
   dplyr::select(date, p_can, u_can, r_can) %>%
   filter(date <= as.Date('2019-12-31'))
 
-macro_can_us %>%
+macro_can_us <- macro_can %>%
   right_join(macro_us, by = 'date')
 
+### Mexico 
+
+gdpd_mex <- read_csv('/Users/marcel/Documents/GitHub/Project_Metrics_3/Extension/Extension_1/Mex_GDP_Deflator_Ind2017.csv') %>%
+  mutate(date = as.Date(observation_date))
+
+unrate_mex <- fredr(
+  series_id = "LRUNTTTTMXM156S",
+  observation_start = as.Date("1987-01-01"),
+  observation_end   = as.Date("2019-12-31")
+)
+
+ffr_mex <- fredr(
+  series_id = "IR3TIB01MXM156N",
+  observation_start = as.Date("1997-01-01"),
+  observation_end   = as.Date("2019-12-31")
+)
+
+exr_mex <- fredr(
+  series_id = "CCUSMA02MXM618N",
+  observation_start = as.Date("1997-01-01"),
+  observation_end   = as.Date("2019-12-31")
+)
+
+# Quarterly averages for monthly series
+
+unrate_q_mex <- unrate_mex %>%
+  mutate(date = floor_date(date, "quarter")) %>%
+  group_by(date) %>%
+  summarise(u_mex = mean(value, na.rm = TRUE), .groups = "drop")
+
+exr_q_mex <- unrate_mex %>%
+  mutate(date = floor_date(date, "quarter")) %>%
+  group_by(date) %>%
+  summarise(exr_mex = mean(value, na.rm = TRUE), .groups = "drop")
+
+ffr_q_mex <- ffr_mex %>%
+  mutate(date = floor_date(date, "quarter")) %>%
+  group_by(date) %>%
+  summarise(r_mex = mean(value, na.rm = TRUE), .groups = "drop")
+
+macro_mex <- gdpd_mex %>%
+  transmute(
+    date = as.Date(date),
+    gdpd_mex = NGDPDSAIXMXQ_NBD20170101
+  ) %>%
+  left_join(unrate_q_mex, by = "date") %>%
+  left_join(ffr_q_mex, by = "date") %>%
+  left_join(exr_q_mex, by ='date') %>%
+  arrange(date) %>%
+  mutate(
+    p_mex = 400 * log(gdpd_mex / lag(gdpd_mex))
+  ) %>%
+  dplyr::select(date, p_mex, u_mex, r_mex) %>%
+  filter(date <= as.Date('2019-12-31'))
+
+macro_mex_us <- macro_mex %>%
+  right_join(macro_us, by = 'date') %>%
+  na.omit()
 
 
