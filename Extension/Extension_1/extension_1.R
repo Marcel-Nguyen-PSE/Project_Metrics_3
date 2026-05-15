@@ -88,7 +88,7 @@ lag_sel_mex <- VARselect(
 lag_sel_mex$selection
 
 var_us_mex <- VAR(
-  var_us_mex_data, p = 4, type = 'const'
+  var_us_mex_data, p = 2, type = 'const'
 )
 
 summary(var_us_mex)

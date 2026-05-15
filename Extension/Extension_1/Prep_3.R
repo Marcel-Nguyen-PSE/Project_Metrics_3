@@ -146,7 +146,7 @@ gdpd_mex <- read_csv('/Users/marcel/Documents/GitHub/Project_Metrics_3/Extension
 
 unrate_mex <- fredr(
   series_id = "LRUNTTTTMXM156S",
-  observation_start = as.Date("1987-01-01"),
+  observation_start = as.Date("1997-01-01"),
   observation_end   = as.Date("2019-12-31")
 )
 
