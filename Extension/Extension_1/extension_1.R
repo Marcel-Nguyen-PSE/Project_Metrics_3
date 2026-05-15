@@ -61,9 +61,17 @@ plot(
 
 fevd_fit_can <- fevd(var_us_can, n.ahead = 20)
 
-jpeg("Extension/Extention_1/Figures/irf_can_us_r.jpeg",
+jpeg("Extension/Extension_1/Figures/irf_can_us_r.jpeg",
      width = 1800, height = 1800, res = 150)
-par(mfrow = c(1, 4))
+par(mfrow = c(2, 2))
 plot(irf_can_r, plot.type = "single")
 dev.off()
+
+jpeg("Extension/Extension_1/Figures/irf_can_us_p.jpeg",
+     width = 1800, height = 1800, res = 150)
+par(mfrow = c(2, 2))
+plot(irf_can_p, plot.type = "single")
+dev.off()
+
+
 
