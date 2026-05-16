@@ -196,6 +196,16 @@ p_fevd <- ggplot(fevd_df, aes(h, share, fill = shock)) +
   facet_wrap(~ variable, ncol = 3) +
   labs(title = "Forecast error variance decomposition",
        x = "Quarters ahead", y = "Share of variance", fill = NULL) +
+  scale_fill_manual(
+    values = c(
+      "US Inflation shock"      = "#08306B",
+      "US Unemployment shock"   = "#2171B5",
+      "US Fed Rate shock"       = "#6BAED6",
+      "CAN Inflation shock"     = "#00441B",
+      "CAN Unemployment shock"  = "#238B45",
+      "CAN Interest Rate shock" = "#74C476"
+    )
+  ) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 
@@ -248,6 +258,16 @@ p_fevd_mex <- ggplot(fevd_df_mex, aes(h, share, fill = shock)) +
   facet_wrap(~ variable, ncol = 3) +
   labs(title = "Forecast error variance decomposition",
        x = "Quarters ahead", y = "Share of variance", fill = NULL) +
+  scale_fill_manual(
+    values = c(
+      "US Inflation shock"      = "#08306B",
+      "US Unemployment shock"   = "#2171B5",
+      "US Fed Rate shock"       = "#6BAED6",
+      "MEX Inflation shock"     = "#00441B",
+      "MEX Unemployment shock"  = "#238B45",
+      "MEX Interest Rate shock" = "#74C476"
+    )
+  ) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 
