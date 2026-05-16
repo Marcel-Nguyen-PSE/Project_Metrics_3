@@ -1,4 +1,5 @@
 # This extension study the spillover effect of U.S. monetary policies on neighbour countries
+# Prep_3.R have to be ran first 
 
 # Canada/U.S 
 
@@ -58,8 +59,6 @@ plot(
   irf_can_p,
   plot.type = 'single'
 )
-
-fevd_fit_can <- fevd(var_us_can, n.ahead = 20)
 
 jpeg("Extension/Extension_1/Figures/irf_can_us_r.jpeg",
      width = 1800, height = 1800, res = 150)
@@ -132,8 +131,6 @@ plot(
   plot.type = 'single'
 )
 
-fevd_fit_mex <- fevd(var_us_mex, n.ahead = 20)
-
 jpeg("Extension/Extension_1/Figures/irf_mex_us_r.jpeg",
      width = 1800, height = 1800, res = 150)
 par(mfrow = c(2, 2))
@@ -148,3 +145,112 @@ dev.off()
 
 plot(var_us_mex_data$r_mex)
 plot(var_us_mex_data$exr_mex)
+
+
+#### FEVD decomp
+fevd_fit_mex <- fevd(var_us_mex, n.ahead = 20)
+fevd_fit_can <- fevd(var_us_can, n.ahead = 20)
+
+fevd_df <- lapply(names(fevd_fit_can), function(v) {
+  d <- as.data.frame(fevd_fit_can[[v]])
+  d$h <- seq_len(nrow(d))
+  d$variable <- v
+  d
+}) |>
+  bind_rows() |>
+  pivot_longer(
+    -c(h, variable),
+    names_to = "shock",
+    values_to = "share"
+  ) |>
+  mutate(
+    variable = factor(
+      variable,
+      levels = c("p", "u", "r", "p_can", "u_can", "r_can"),
+      labels = c(
+        "US Inflation",
+        "US Unemployment",
+        "US Fed Rate",
+        "CAN Inflation",
+        "CAN Unemployment",
+        "CAN Interest Rate"
+      )
+    ),
+    shock = factor(
+      shock,
+      levels = c("p", "u", "r", "p_can", "u_can", "r_can"),
+      labels = c(
+        "US Inflation shock",
+        "US Unemployment shock",
+        "US Fed Rate shock",
+        "CAN Inflation shock",
+        "CAN Unemployment shock",
+        "CAN Interest Rate shock"
+      )
+    ),
+    share = 100 * share
+  )
+
+p_fevd <- ggplot(fevd_df, aes(h, share, fill = shock)) +
+  geom_area(alpha = 0.85) +                                 # Stacked area plot
+  facet_wrap(~ variable, ncol = 3) +
+  labs(title = "Forecast error variance decomposition",
+       x = "Quarters ahead", y = "Share of variance", fill = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+
+print(p_fevd)
+
+ggsave('Extension/Extension_1/Figures/"FEVD_CAN_US.jpeg', p_fevd, width = 12, height = 8)
+
+fevd_df_mex <- lapply(names(fevd_fit_mex), function(v) {
+  d <- as.data.frame(fevd_fit_mex[[v]])
+  d$h <- seq_len(nrow(d))
+  d$variable <- v
+  d
+}) |>
+  bind_rows() |>
+  pivot_longer(
+    -c(h, variable),
+    names_to = "shock",
+    values_to = "share"
+  ) |>
+  mutate(
+    variable = factor(
+      variable,
+      levels = c("p", "u", "r", "p_mex", "u_mex", "r_mex"),
+      labels = c(
+        "US Inflation",
+        "US Unemployment",
+        "US Fed Rate",
+        "MEX Inflation",
+        "MEX Unemployment",
+        "MEX Interest Rate"
+      )
+    ),
+    shock = factor(
+      shock,
+      levels = c("p", "u", "r", "p_mex", "u_mex", "r_mex"),
+      labels = c(
+        "US Inflation shock",
+        "US Unemployment shock",
+        "US Fed Rate shock",
+        "MEX Inflation shock",
+        "MEX Unemployment shock",
+        "MEX Interest Rate shock"
+      )
+    ),
+    share = 100 * share
+  )
+
+p_fevd_mex <- ggplot(fevd_df_mex, aes(h, share, fill = shock)) +
+  geom_area(alpha = 0.85) +                                 # Stacked area plot
+  facet_wrap(~ variable, ncol = 3) +
+  labs(title = "Forecast error variance decomposition",
+       x = "Quarters ahead", y = "Share of variance", fill = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+
+print(p_fevd_mex)
+
+ggsave('Extension/Extension_1/Figures/"FEVD_MEX_US.jpeg', p_fevd_mex, width = 12, height = 8)

@@ -23,6 +23,6 @@ IRFs are computed using the same recursive ordering and horizon, but plotted usi
 
 30/04/26 "...
 
-15/05/26: I revised the fig 2 (fig 3) replication in order to take the desired variables instead of present, much more convincing output but still different.
+15/05/26: I revised the fig 2 (fig 3) replication in order to take the desired variables instead of present, much more convincing output but still different. I began the first extension by looking at spillover effects of US monetary and macro conjoncture on neighbor countries (e.g, US and Mexico)
 
 
