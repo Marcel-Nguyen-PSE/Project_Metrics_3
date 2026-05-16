@@ -4,7 +4,14 @@
 # Canada/U.S 
 
 var_us_can_data <- macro_can_us %>%
-  dplyr::select(-date) %>%
+  dplyr::select(
+    p,
+    u,
+    r,
+    p_can,
+    u_can,
+    r_can
+  ) %>%
   na.omit()
 
 lag_sel <- VARselect(
@@ -29,7 +36,7 @@ max(roots_mod_can)
 irf_can_r <- irf(
   var_us_can,
   impulse = "r",
-  response = c('p_can', 'u_can', 'r_can', 'exr_can'),
+  response = c('p_can', 'u_can', 'r_can'),
   n.ahead = 20,
   ortho = TRUE,
   boot = TRUE,
@@ -40,7 +47,7 @@ irf_can_r <- irf(
 irf_can_p <- irf(
   var_us_can,
   impulse = "p",
-  response = c('p_can', 'u_can', 'r_can', 'exr_can'),
+  response = c('p_can', 'u_can', 'r_can'),
   n.ahead = 20,
   ortho = TRUE,
   boot = TRUE,
@@ -274,3 +281,46 @@ p_fevd_mex <- ggplot(fevd_df_mex, aes(h, share, fill = shock)) +
 print(p_fevd_mex)
 
 ggsave('Extension/Extension_1/Figures/"FEVD_MEX_US.jpeg', p_fevd_mex, width = 12, height = 8)
+
+### Robustness cheks 
+
+# Check for mexico instability 
+
+var_us_mex_data_2001 <- macro_mex_us_post2001 %>%
+  dplyr::select(p, u, r, p_mex, u_mex, r_mex) %>%
+  na.omit()
+
+lag_sel_mex_2001 <- VARselect(
+  var_us_mex_data_2001,
+  lag.max = 7,
+  type = 'const'
+)
+
+lag_sel_mex_2001$selection
+
+var_us_mex_2001 <- VAR(
+  var_us_mex_data_2001, p = 1, type = 'const'
+)
+
+summary(var_us_mex_2001)
+
+causality(var_us_mex_2001, cause = c("p", "u", "r"))
+
+roots_mod_mex_2001 <- roots(var_us_mex_2001, modulus = TRUE)
+max(roots_mod_mex_2001)
+
+irf_mex_r_2001 <- irf(
+  var_us_mex_2001,
+  impulse = "r",
+  response = c('p_mex', 'u_mex', 'r_mex'),
+  n.ahead = 20,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 500,
+  ci = 0.95
+)
+
+plot(
+  irf_mex_r
+)
+
