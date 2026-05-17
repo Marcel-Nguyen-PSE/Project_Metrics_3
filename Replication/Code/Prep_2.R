@@ -277,6 +277,8 @@ roots_1_out <- data.frame(
 View(roots_1_out)
 print(roots_1_out)
 
+roots_1_typst <- tt_save(tt(roots_1_out, rownames = FALSE), 'Replication/Figures/Preliminaries/Typst/roots_1.typ')
+
 stargazer(
   roots_1_out,
   type = "latex",
@@ -304,7 +306,7 @@ diagnostics_1 <- data.frame(
   ),
 
   p_value = c(
-    format.pval(serial_test_1$serial$p.value, digits = 3, eps = 0.001),         #because otherwise it put results like 1e-04 or 0e+00
+    format.pval(serial_test_1$serial$p.value, digits = 3, eps = 0.001),       
     format.pval(normality_test_1$jb.mul$JB$p.value, digits = 3, eps = 0.001)
   )
 )

@@ -1,0 +1,20 @@
+#table(
+  columns: (1fr, 1fr),
+  stroke: none,
+  table.hline(stroke: 1pt),
+  [root\_number], [modulus],
+  table.hline(stroke: 0.5pt),
+  [1], [0.971],
+  [2], [0.971],
+  [3], [0.803],
+  [4], [0.803],
+  [5], [0.685],
+  [6], [0.685],
+  [7], [0.571],
+  [8], [0.571],
+  [9], [0.446],
+  [10], [0.446],
+  [11], [0.19],
+  [12], [0.19],
+  table.hline(stroke: 1pt)
+)
