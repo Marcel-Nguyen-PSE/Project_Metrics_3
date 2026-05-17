@@ -43,8 +43,6 @@ for (j in seq_along(colnames(macro_1960_2000))) {
   stationarity_1$KPSS_pvalue[j] <- kpss_1$p.value
 }
 
-round(stationarity_1, 3)
-
 # PP test/ DF-GLS test:
 # H0 = unit root / non-stationary
 # Reject H0 if p-value < 0.05 or if test statistic is more negative than the 5% critical value
@@ -65,6 +63,29 @@ lag_selection_1 <- VARselect(
 
 lag_selection_1$selection
 lag_selection_1$criteria
+
+pt_table <- data.frame(
+  lag = 1:8,
+  PT_pvalue = NA
+)
+
+for (p in 1:8) {
+  fit <- VAR(
+    macro_1960_2000,
+    p = p,
+    type = "const"
+  )
+  test <- serial.test(
+    fit,
+    lags.pt = 16,
+    type = "PT.asymptotic"
+  )
+  pt_table$PT_pvalue[p] <- test$serial$p.value
+}
+pt_table <- pt_table %>%
+  mutate(across(where(is.numeric), ~ round(.x, 5)))
+
+tt_save(tt(pt_table, rownames = FALSE), 'Replication/Figures/Preliminaries/Typst/pt_series_test.typ')
 
 # FPE(n): Final prediction error
 # Lower value = preferred lag length.
@@ -198,6 +219,8 @@ dir.create("Replication/Figures/Preliminaries/PNG", recursive = TRUE, showWarnin
 stationarity_1_out <- stationarity_1 %>%
   mutate(across(where(is.numeric), ~ round(.x, 3)))
 
+stationarity_1_typst <- tt_save(tt(stationarity_1_out, rownames = FALSE), 'Replication/Figures/Preliminaries/Typst/stationarity_1_out.typ')
+
 # Visualize in R
 View(stationarity_1_out)
 print(stationarity_1_out)
@@ -226,6 +249,9 @@ lag_selection_1_out <- as.data.frame(lag_selection_1$criteria) %>%
 
 View(lag_selection_1_out)
 print(lag_selection_1_out)
+
+lag_selection_typst <- tt(lag_selection_1_out, rownames = TRUE)
+tt_save(lag_selection_typst, 'Replication/Figures/Preliminaries/Typst/lag_selection_test.typ')
 
 stargazer(
   lag_selection_1_out,
