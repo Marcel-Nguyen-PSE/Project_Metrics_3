@@ -151,8 +151,6 @@ plot(irf_mex_p, plot.type = "single")
 dev.off()
 
 plot(var_us_mex_data$r_mex)
-plot(var_us_mex_data$exr_mex)
-
 
 #### FEVD decomp
 fevd_fit_mex <- fevd(var_us_mex, n.ahead = 20)
