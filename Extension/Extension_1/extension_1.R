@@ -214,8 +214,6 @@ p_fevd <- ggplot(fevd_df, aes(h, share, fill = shock)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 
-print(p_fevd)
-
 ggsave('Extension/Extension_1/Figures/FEVD_CAN_US.jpeg', p_fevd, width = 12, height = 8)
 
 fevd_df_mex <- lapply(names(fevd_fit_mex), function(v) {
