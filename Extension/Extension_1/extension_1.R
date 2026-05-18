@@ -276,8 +276,6 @@ p_fevd_mex <- ggplot(fevd_df_mex, aes(h, share, fill = shock)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 
-print(p_fevd_mex)
-
 ggsave('Extension/Extension_1/Figures/FEVD_MEX_US.jpeg', p_fevd_mex, width = 12, height = 8)
 
 ### Robustness cheks 
