@@ -318,7 +318,4 @@ irf_mex_r_2001 <- irf(
   ci = 0.95
 )
 
-plot(
-  irf_mex_r
-)
 
