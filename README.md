@@ -24,7 +24,12 @@ IRFs are computed using the same recursive ordering and horizon, but plotted usi
 30/04/26 "...
 
 15/05/26: I revised the fig 2 (fig 3) replication in order to take the desired variables instead of present, much more convincing output but still different. I began the first extension by looking at spillover effects of US monetary and macro conjoncture on neighbor countries (e.g, US and Mexico). Results yield a strng spillover effect in unemployment and monetary policy in Mexico, we may focus on this after. However, results are not really stable for mexico, due to missing data range....may need to recompute with more reliable data.
+
 15/05/26: preliminaries (stationarity, lag specification are realised, exported in pdf)
+
+19/05/26: the impulse functions of different monetary rules are different from the paper. I tried to look in the original rep package to see how the authors computed it. I used Claude to translate .gss and .srt files and to compare it with my R code.
+
+
 
 
 
