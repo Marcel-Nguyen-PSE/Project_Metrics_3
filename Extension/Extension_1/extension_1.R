@@ -202,6 +202,47 @@ par(mfrow = c(2, 2))
 plot(irf_can_r_rest, plot.type = "single")
 dev.off()
 
+lag_selection_can_out <- as.data.frame(lag_sel_rest$criteria) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+lag_selection_can_typst <- tt(lag_selection_can_out, rownames = TRUE)
+tt_save(lag_selection_can_typst, 'Extension/Extension_1/Figures/lag_table_can_rest.typ')
+
+jpeg(
+  "Extension/Extension_1/Figures/acf_pacf_restricted.jpeg",
+  width = 2400,
+  height = 3200,
+  res = 200
+)
+
+par(mfrow = c(4, 2))
+
+acf(var_us_can_data_rest$r,
+    main = "ACF of US federal funds rate r",
+    lag.max = 20)
+pacf(var_us_can_data_rest$r,
+     main = "PACF of US federal funds rate r",
+     lag.max = 20)
+acf(var_us_can_data_rest$p_can,
+    main = "ACF of Canada inflation p_can",
+    lag.max = 20)
+pacf(var_us_can_data_rest$p_can,
+     main = "PACF of Canada inflation p_can",
+     lag.max = 20)
+acf(var_us_can_data_rest$u_can,
+    main = "ACF of Canada unemployment u_can",
+    lag.max = 20)
+pacf(var_us_can_data_rest$u_can,
+     main = "PACF of Canada unemployment u_can",
+     lag.max = 20)
+acf(var_us_can_data_rest$r_can,
+    main = "ACF of Canada interest rate r_can",
+    lag.max = 20)
+pacf(var_us_can_data_rest$r_can,
+     main = "PACF of Canada interest rate r_can",
+     lag.max = 20)
+dev.off()
+
 # Mexico/US
 
 var_us_mex_data <- macro_mex_us %>%
