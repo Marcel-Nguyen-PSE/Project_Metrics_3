@@ -55,28 +55,151 @@ irf_can_p <- irf(
   ci = 0.95
 )
 
-par(mfrow = c(2, 2))
+# Restricted model with only US FED Rate 
+
+var_us_can_data_rest <- macro_can_us %>%
+  dplyr::select(
+    r,
+    p_can,
+    u_can,
+    r_can
+  ) %>%
+  na.omit()
+
+lag_sel_rest <- VARselect(
+  var_us_can_data_rest,
+  lag.max = 8,
+  type = 'const'
+)
+
+lag_sel_rest$selection
+
+var_us_can_rest <- VAR(
+  var_us_can_data_rest, p = 2, type = 'const'
+)
+
+summary(var_us_can_rest)
+
+causality(var_us_can_rest, cause = 'r')
+
+roots_mod_can_rest <- roots(var_us_can_rest, modulus = TRUE)
+max(roots_mod_can_rest)
+
+irf_can_r_rest <- irf(
+  var_us_can_rest,
+  impulse = "r",
+  response = c('p_can', 'u_can', 'r_can'),
+  n.ahead = 20,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 500,
+  ci = 0.95
+)
+
+jpeg(
+  "Extension/Extension_1/Figures/irf_full_vs_restricted.jpeg",
+  width = 2400,
+  height = 800,
+  res = 200
+)
+
+h <- 0:(nrow(irf_can_r$irf$r) - 1)
+
+par(mfrow = c(1, 3))
 
 plot(
-  irf_can_r,
-  plot.type = "single"
+  h,
+  irf_can_r$irf$r[, "p_can"],
+  type = "l",
+  lwd = 2,
+  lty = 1,
+  ylim = c(-1,1),
+  main = "Canada inflation response",
+  xlab = "Quarters",
+  ylab = "Response"
+)
+
+lines(h, irf_can_r_rest$irf$r[, "p_can"], lwd = 2, lty = 2)
+abline(h = 0, col = "red")
+
+legend(
+  "topright",
+  legend = c("Full VAR", "Restricted VAR"),
+  lty = c(1, 2),
+  lwd = 2,
+  bty = "n"
 )
 
 plot(
-  irf_can_p,
-  plot.type = 'single'
+  h,
+  irf_can_r$irf$r[, "u_can"],
+  type = "l",
+  lwd = 2,
+  lty = 1,
+  ylim = c(-1,1),
+  main = "Canada unemployment response",
+  xlab = "Quarters",
+  ylab = "Response"
 )
 
-jpeg("Extension/Extension_1/Figures/irf_can_us_r.jpeg",
-     width = 1800, height = 1800, res = 150)
-par(mfrow = c(2, 2))
-plot(irf_can_r, plot.type = "single")
+lines(h, irf_can_r_rest$irf$r[, "u_can"], lwd = 2, lty = 2)
+abline(h = 0, col = "red")
+
+plot(
+  h,
+  irf_can_r$irf$r[, "r_can"],
+  type = "l",
+  lwd = 2,
+  lty = 1,
+  ylim = c(-1,1),
+  main = "Canada interest rate response",
+  xlab = "Quarters",
+  ylab = "Response"
+)
+
+lines(h, irf_can_r_rest$irf$r[, "r_can"], lwd = 2, lty = 2)
+abline(h = 0, col = "red")
+
 dev.off()
 
-jpeg("Extension/Extension_1/Figures/irf_can_us_p.jpeg",
+h <- c(1, 4, 8, 12)
+
+mse_results <- data.frame()
+
+for(h in horizons) {
+  errors_full <- c()
+  errors_rest <- c()
+  for(t in 40:(nrow(var_us_can_data) - h)) {
+    train_full <- var_us_can_data[1:t, ]
+    fit_full <- VAR(train_full, p = 2, type = "const")
+    fc_full <- predict(fit_full, n.ahead = h)$fcst
+    forecast_full <- fc_full$p_can[h, "fcst"]
+    actual_full <- var_us_can_data$p_can[t + h]
+    errors_full <- c(errors_full, actual_full - forecast_full)
+    train_rest <- var_us_can_data_rest[1:t, ]
+    fit_rest <- VAR(train_rest, p = 2, type = "const")
+    fc_rest <- predict(fit_rest, n.ahead = h)$fcst
+    forecast_rest <- fc_rest$p_can[h, "fcst"]
+    actual_rest <- var_us_can_data_rest$p_can[t + h]
+    errors_rest <- c(errors_rest, actual_rest - forecast_rest)
+  }
+  mse_results <- rbind(
+    mse_results,
+    data.frame(
+      horizon = h,
+      mse_full = mean(errors_full^2),
+      mse_restricted = mean(errors_rest^2)
+    )
+  )
+}
+mse_results <- mse_results %>% 
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+mse_results_table <- tt_save(tt(mse_results, rownames = FALSE), 'Extension/Extension_1/Figures/MSE_rest_full.typ')
+
+jpeg("Extension/Extension_1/Figures/irf_can_us_r_rest.jpeg",
      width = 1800, height = 1800, res = 150)
 par(mfrow = c(2, 2))
-plot(irf_can_p, plot.type = "single")
+plot(irf_can_r_rest, plot.type = "single")
 dev.off()
 
 # Mexico/US
