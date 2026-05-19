@@ -29,7 +29,13 @@ IRFs are computed using the same recursive ordering and horizon, but plotted usi
 
 19/05/26: the impulse functions of different monetary rules are different from the paper. I tried to look in the original rep package to see how the authors computed it. I used Claude to translate .gss and .srt files and to compare it with my R code. I used the coefficients in plain value and I used explicitly the taylor rule of the paper. The code yields much better results. 
 
-For the first extension, I kept only US FED Rate as US variable as suggested.
+For the first extension, I kept only US FED Rate as US variable as suggested, and computed IRF and other tests. 
+
+For mexico, I noticed that some values were missing (eg, the u rate that was NA from 2005 to 2017). I retrived proper data of unemployment from the OECD data base. (this may explain the absence of consistency in the prev VAR). I have much more plausible results. 
+
+
+
+
 
 
 

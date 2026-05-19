@@ -245,7 +245,7 @@ dev.off()
 
 # Mexico/US
 
-var_us_mex_data <- macro_mex_us %>%
+var_us_mex_data <- macro_mex_us_post2000 %>%
   dplyr::select(p, u, r, p_mex, u_mex, r_mex) %>%
   na.omit()
 
@@ -256,6 +256,12 @@ lag_sel_mex <- VARselect(
 )
 
 lag_sel_mex$selection
+
+lag_selection_mex_out <- as.data.frame(lag_sel_mex$criteria) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+lag_selection_mex_typst <- tt(lag_selection_mex_out, rownames = TRUE)
+tt_save(lag_selection_mex_typst, 'Extension/Extension_1/Figures/lag_table_mex_rest.typ')
 
 var_us_mex <- VAR(
   var_us_mex_data, p = 2, type = 'const'
@@ -316,9 +322,50 @@ dev.off()
 
 plot(var_us_mex_data$r_mex)
 
+# Restricted 
+
+var_us_mex_data_rest <- macro_mex_us %>%
+  dplyr::select(
+    r,
+    p_mex,
+    u_mex,
+    r_mex
+  ) %>%
+  na.omit()
+
+lag_sel_rest_mex <- VARselect(
+  var_us_mex_data_rest,
+  lag.max = 8,
+  type = 'const'
+)
+
+lag_sel_rest_mex$selection
+
+var_us_can_rest <- VAR(
+  var_us_can_data_rest, p = 2, type = 'const'
+)
+
+summary(var_us_can_rest)
+
+causality(var_us_can_rest, cause = 'r')
+
+roots_mod_can_rest <- roots(var_us_can_rest, modulus = TRUE)
+max(roots_mod_can_rest)
+
+irf_can_r_rest <- irf(
+  var_us_can_rest,
+  impulse = "r",
+  response = c('p_can', 'u_can', 'r_can'),
+  n.ahead = 20,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 500,
+  ci = 0.95
+)
+
 #### FEVD decomp
 fevd_fit_mex <- fevd(var_us_mex, n.ahead = 20)
-fevd_fit_can <- fevd(var_us_can, n.ahead = 20)
+fevd_fit_can <- fevd(var_us_can_rest, n.ahead = 20)
 
 fevd_df <- lapply(names(fevd_fit_can), function(v) {
   d <- as.data.frame(fevd_fit_can[[v]])

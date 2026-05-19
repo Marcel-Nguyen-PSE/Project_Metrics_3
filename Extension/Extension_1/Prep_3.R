@@ -145,20 +145,14 @@ gdpd_mex <- read_csv('/Users/marcel/Documents/GitHub/Project_Metrics_3/Extension
   mutate(date = as.Date(observation_date))
 
 unrate_mex <- fredr(
-  series_id = "LRUNTTTTMXM156S",
-  observation_start = as.Date("1997-01-01"),
+  series_id = "LRHUTTTTMXM156S",
+  observation_start = as.Date("1987-01-01"),
   observation_end   = as.Date("2019-12-31")
 )
 
 ffr_mex <- fredr(
-  series_id = "IR3TIB01MXM156N",
-  observation_start = as.Date("1997-01-01"),
-  observation_end   = as.Date("2019-12-31")
-)
-
-exr_mex <- fredr(
-  series_id = "CCUSMA02MXM618N",
-  observation_start = as.Date("1997-01-01"),
+  series_id = "IRSTCI01MXQ156N",
+  observation_start = as.Date("1987-01-01"),
   observation_end   = as.Date("2019-12-31")
 )
 
@@ -198,10 +192,30 @@ macro_mex_us <- macro_mex %>%
   right_join(macro_us, by = 'date') %>%
   na.omit()
 
-macro_mex_us_post2001 <- macro_mex %>%
+macro_mex_us_post2000 <- macro_mex %>%
   right_join(macro_us, by = 'date') %>%
   na.omit() %>%
-  filter(date >= as.Date('2001-01-01'))
+  filter(date >= as.Date('1990-01-01'))
 
+plot_mex_p <- ggplot(macro_mex, aes(x = date)) + geom_line(aes(y = p_mex)) + theme_minimal()
+plot_mex_p
+plot_mex_u <- ggplot(macro_mex, aes(x = date)) + geom_line(aes(y = u_mex)) + theme_minimal()
+plot_mex_u
+plot_mex_r <- ggplot(macro_mex, aes(x = date)) + geom_line(aes(y = r_mex)) + theme_minimal()
+plot_mex_r
 
-test <- 2
+jpeg(
+  "Extension/Extension_1/Figures/plot_mex_var.jpeg",
+  width = 2400,
+  height = 3200,
+  res = 200
+)
+
+grid.arrange(
+  plot_mex_p,
+  plot_mex_u,
+  plot_mex_r,
+  ncol = 1
+)
+
+dev.off()
