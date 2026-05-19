@@ -27,7 +27,7 @@ IRFs are computed using the same recursive ordering and horizon, but plotted usi
 
 15/05/26: preliminaries (stationarity, lag specification are realised, exported in pdf)
 
-19/05/26: the impulse functions of different monetary rules are different from the paper. I tried to look in the original rep package to see how the authors computed it. I used Claude to translate .gss and .srt files and to compare it with my R code.
+19/05/26: the impulse functions of different monetary rules are different from the paper. I tried to look in the original rep package to see how the authors computed it. I used Claude to translate .gss and .srt files and to compare it with my R code. I used the coefficients in plain value and I used explicitly the taylor rule of the paper. The code yields much better results.
 
 
 
