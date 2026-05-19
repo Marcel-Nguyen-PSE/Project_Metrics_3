@@ -202,3 +202,6 @@ macro_mex_us_post2001 <- macro_mex %>%
   right_join(macro_us, by = 'date') %>%
   na.omit() %>%
   filter(date >= as.Date('2001-01-01'))
+
+
+test <- 2
