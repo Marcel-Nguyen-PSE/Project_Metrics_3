@@ -1,5 +1,6 @@
 # For this extension, prep_1.R and prep_2.R have to be ran first.
-# This extension compares the impulse response functions in function of lag orders 
+# this extension first compares the VAR(4) to Var (3) and VAR (5) to understand why VAR (4) was chosen as the baseline model. Then, it compares the impulse response functions of the three models to check robustness of the results to lag order choice.
+
 
 var_4 <- VAR(
   y = macro_1960_2000,
@@ -19,6 +20,17 @@ var_5 <- VAR(
   type = 'const'
 )
 
+#  Residual serial correlation test
+serial.test(var_3, lags.pt = 12, type = "PT.asymptotic")
+serial.test(var_4, lags.pt = 12, type = "PT.asymptotic")
+serial.test(var_5, lags.pt = 12, type = "PT.asymptotic")
+
+# Stability roots
+max(roots(var_3))
+max(roots(var_4))
+max(roots(var_5))
+
+# Compute IRFs for each VAR model to chack robustness
 irf_var_4 <- irf(
   var_4,
   impulse = c("p", "u", "r"),
