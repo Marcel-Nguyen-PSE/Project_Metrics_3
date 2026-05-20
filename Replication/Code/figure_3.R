@@ -5,7 +5,7 @@ fu_fwd <- 0.085
 
 taylor_backward <- macro_1960_2000 %>%
   mutate(
-    ra = r - fp_back * p - fu_back * u
+    ra = r + fp_back * p - fu_back * u
   ) %>%
   drop_na() %>%
   dplyr::select(ra, p, u)
