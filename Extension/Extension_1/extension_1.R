@@ -341,8 +341,8 @@ lag_sel_rest_mex <- VARselect(
 
 lag_sel_rest_mex$selection
 
-var_us_can_rest <- VAR(
-  var_us_can_data_rest, p = 2, type = 'const'
+var_us_mex_rest <- VAR(
+  var_us_mex_data_rest, p = 2, type = 'const'
 )
 
 summary(var_us_can_rest)
@@ -365,6 +365,7 @@ irf_can_r_rest <- irf(
 
 #### FEVD decomp
 fevd_fit_mex <- fevd(var_us_mex, n.ahead = 20)
+fevd_fit_mex_rest <- fevd(var_us_mex_rest, n.ahead = 20)
 fevd_fit_can <- fevd(var_us_can_rest, n.ahead = 20)
 
 fevd_df <- lapply(names(fevd_fit_can), function(v) {
@@ -468,7 +469,7 @@ fevd_df_mex <- lapply(names(fevd_fit_mex), function(v) {
   )
 
 p_fevd_mex <- ggplot(fevd_df_mex, aes(h, share, fill = shock)) +
-  geom_area(alpha = 0.85) +                                 # Stacked area plot
+  geom_area(alpha = 0.85) +                      
   facet_wrap(~ variable, ncol = 3) +
   labs(title = "Forecast error variance decomposition",
        x = "Quarters ahead", y = "Share of variance", fill = NULL) +
@@ -504,7 +505,7 @@ lag_sel_mex_2001 <- VARselect(
 lag_sel_mex_2001$selection
 
 var_us_mex_2001 <- VAR(
-  var_us_mex_data_2001, p = 1, type = 'const'
+  var_us_mex_data_2001, p = 2, type = 'const'
 )
 
 summary(var_us_mex_2001)
@@ -525,4 +526,210 @@ irf_mex_r_2001 <- irf(
   ci = 0.95
 )
 
+### VAR for MEX (monthly revised)
 
+var_us_mex_monthly <- macro_mex_us_monthly %>%
+  dplyr::select(r_us, p_monthly, u_monthly, r_monthly) %>%
+  na.omit()
+
+lag_sel_mex_monthly <- VARselect(
+  var_us_mex_monthly,
+  lag.max = 7,
+  type = 'const'
+)
+
+lag_sel_mex_monthly$selection
+
+lag_selection_mex_out_monthly <- as.data.frame(lag_sel_mex_monthly$criteria) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+lag_selection_mex_monthly_typst <- tt(lag_selection_mex_out_monthly, rownames = TRUE)
+tt_save(lag_selection_mex_monthly_typst, 'Extension/Extension_1/Figures/lag_table_mex_rest_monthly.typ')
+
+var_us_mex_monthly <- VAR(
+  var_us_mex_monthly, p = 2, type = 'const'
+)
+
+summary(var_us_mex_monthly)
+
+causality(var_us_mex_monthly, cause = c("p", "u", "r"))
+
+roots_mod_mex_monthly <- roots(var_us_mex_monthly, modulus = TRUE)
+max(roots_mod_mex_monthly)
+
+irf_mex_r_monthly <- irf(
+  var_us_mex_monthly,
+  impulse = "r_us",
+  response = c('p_monthly', 'u_monthly', 'r_monthly'),
+  n.ahead = 20,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 500,
+  ci = 0.95
+)
+
+jpeg(
+  "Extension/Extension_1/Figures/irf_mex_r_monthly.jpeg",
+  width = 1800,
+  height = 900,
+  res = 200
+)
+
+plot(irf_mex_r_monthly)
+
+dev.off()
+
+fevd_fit_mex_monthly <- fevd(
+  var_us_mex_monthly,
+  n.ahead = 20
+)
+
+fevd_df_mex_monthly <- lapply(names(fevd_fit_mex_monthly), function(v) {
+  
+  d <- as.data.frame(fevd_fit_mex_monthly[[v]])
+  d$h <- seq_len(nrow(d))
+  d$variable <- v
+  
+  d
+  
+}) |>
+  bind_rows() |>
+  pivot_longer(
+    -c(h, variable),
+    names_to = "shock",
+    values_to = "share"
+  ) |>
+  mutate(
+    variable = factor(
+      variable,
+      levels = c("r_us", "p_monthly", "u_monthly", "r_monthly"),
+      labels = c(
+        "US Fed Rate",
+        "MEX Inflation",
+        "MEX Unemployment",
+        "MEX Interest Rate"
+      )
+    ),
+    shock = factor(
+      shock,
+      levels = c("r_us", "p_monthly", "u_monthly", "r_monthly"),
+      labels = c(
+        "US Fed Rate shock",
+        "MEX Inflation shock",
+        "MEX Unemployment shock",
+        "MEX Interest Rate shock"
+      )
+    ),
+    share = 100 * share
+  )
+
+p_fevd_mex_monthly <- ggplot(
+  fevd_df_mex_monthly,
+  aes(x = h, y = share, fill = shock)
+) +
+  geom_area(alpha = 0.85) +
+  facet_wrap(~ variable, ncol = 2) +
+  labs(
+    title = "Forecast error variance decomposition: Mexico monthly VAR",
+    x = "Months ahead",
+    y = "Share of forecast-error variance",
+    fill = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "bottom"
+  )
+
+ggsave(
+  "Extension/Extension_1/Figures/FEVD_MEX_monthly_US.jpeg",
+  p_fevd_mex_monthly,
+  width = 12,
+  height = 8
+)
+
+fevd_fit_mex_rest <- fevd(
+  var_us_mex_rest,
+  n.ahead = 20
+)
+
+fevd_df_mex_rest <- lapply(names(fevd_fit_mex_rest), function(v) {
+  d <- as.data.frame(fevd_fit_mex_rest[[v]])
+  d$h <- seq_len(nrow(d))
+  d$variable <- v
+  d
+}) |>
+  bind_rows() |>
+  pivot_longer(
+    -c(h, variable),
+    names_to = "shock",
+    values_to = "share"
+  ) |>
+  mutate(
+    
+    variable = factor(
+      variable,
+      levels = c(
+        "r",
+        "p_mex",
+        "u_mex",
+        "r_mex"
+      ),
+      labels = c(
+        "US Fed Rate",
+        "MEX Inflation",
+        "MEX Unemployment",
+        "MEX Interest Rate"
+      )
+    ),
+    
+    shock = factor(
+      shock,
+      levels = c(
+        "r",
+        "p_mex",
+        "u_mex",
+        "r_mex"
+      ),
+      labels = c(
+        "US Fed Rate shock",
+        "MEX Inflation shock",
+        "MEX Unemployment shock",
+        "MEX Interest Rate shock"
+      )
+    ),
+    
+    share = 100 * share
+    
+  )
+
+p_fevd_mex_rest <- ggplot(
+  fevd_df_mex_rest,
+  aes(x = h, y = share, fill = shock)
+) +
+  
+  geom_area(alpha = 0.85) +
+  
+  facet_wrap(
+    ~ variable,
+    ncol = 2
+  ) +
+  
+  labs(
+    title = "Forecast error variance decomposition: Mexico quarterly VAR",
+    x = "Quarters ahead",
+    y = "Share of forecast-error variance",
+    fill = NULL
+  ) +
+  
+  theme_minimal(base_size = 11) +
+  
+  theme(
+    legend.position = "bottom"
+  )
+
+ggsave(
+  "Extension/Extension_1/Figures/FEVD_MEX_US_rest.jpeg",
+  p_fevd_mex_rest,
+  width = 12,
+  height = 8
+)

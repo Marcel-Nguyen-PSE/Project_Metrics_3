@@ -83,7 +83,7 @@ macro_us <- macro %>%
 
 ### Canada 
 
-gdpd_can <- read_csv("/Users/marcel/Documents/GitHub/Project_Metrics_3/Extension/Extension_1/Can_GDP_Delator_Ind2017.csv") %>%
+gdpd_can <- read_csv("Extension/Extension_1/Data/Can_GDP_Delator_Ind2017.csv") %>%
   mutate(date = as.Date(observation_date))
 
 unrate_can <- fredr(
@@ -141,7 +141,7 @@ macro_can_us <- macro_can %>%
 
 ### Mexico 
 
-gdpd_mex <- read_csv('/Users/marcel/Documents/GitHub/Project_Metrics_3/Extension/Extension_1/Mex_GDP_Deflator_Ind2017.csv') %>%
+gdpd_mex <- read_csv('Extension/Extension_1/Data/Mex_GDP_Deflator_Ind2017.csv') %>%
   mutate(date = as.Date(observation_date))
 
 unrate_mex <- fredr(
@@ -219,3 +219,41 @@ grid.arrange(
 )
 
 dev.off()
+
+# Montly data for Mexico 
+
+cpi_mex_monthly <- fredr(
+  series_id = "CPALTT01MXM657N",
+  observation_start = as.Date("2000-01-01"),
+  observation_end   = as.Date("2019-12-31")
+) %>%
+  rename(p_monthly = 'value') %>%
+  dplyr::select(date, p_monthly)
+
+u_mex_monthly <- read_csv('Extension/Extension_1/Data/LRHUTTTTMXM156S.csv')%>%
+  rename(u_monthly = 'LRHUTTTTMXM156S') %>%
+  mutate(date = as.Date(observation_date)) %>%
+  dplyr::select(-observation_date)
+
+r_mex_monthly <- fredr(
+  series_id = "IRSTCI01MXM156N",
+  observation_start = as.Date("2000-01-01"),
+  observation_end   = as.Date("2019-12-31")
+) %>%
+  rename(r_monthly = 'value') %>%
+  dplyr::select(date, r_monthly)
+
+macro_mex_monthly <- cpi_mex_monthly %>%
+  left_join(u_mex_monthly, by = 'date') %>%
+  left_join(r_mex_monthly, by = 'date')
+
+ffr_2000 <- ffr %>%
+  filter(date >= as.Date('2000-01-01'))
+
+macro_mex_us_monthly <- macro_mex_monthly %>%
+  left_join(ffr_2000, by = 'date') %>%
+  rename(r_us = 'value') %>%
+  dplyr::select(-series_id, -realtime_start, -realtime_end)
+
+
+
