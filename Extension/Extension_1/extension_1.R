@@ -341,8 +341,8 @@ lag_sel_rest_mex <- VARselect(
 
 lag_sel_rest_mex$selection
 
-var_us_can_rest <- VAR(
-  var_us_can_data_rest, p = 2, type = 'const'
+var_us_mex_rest <- VAR(
+  var_us_mex_data_rest, p = 2, type = 'const'
 )
 
 summary(var_us_can_rest)
@@ -363,10 +363,9 @@ irf_can_r_rest <- irf(
   ci = 0.95
 )
 
-
-
 #### FEVD decomp
 fevd_fit_mex <- fevd(var_us_mex, n.ahead = 20)
+fevd_fit_mex_rest <- fevd(var_us_mex_rest, n.ahead = 20)
 fevd_fit_can <- fevd(var_us_can_rest, n.ahead = 20)
 
 fevd_df <- lapply(names(fevd_fit_can), function(v) {
@@ -644,6 +643,93 @@ p_fevd_mex_monthly <- ggplot(
 ggsave(
   "Extension/Extension_1/Figures/FEVD_MEX_monthly_US.jpeg",
   p_fevd_mex_monthly,
+  width = 12,
+  height = 8
+)
+
+fevd_fit_mex_rest <- fevd(
+  var_us_mex_rest,
+  n.ahead = 20
+)
+
+fevd_df_mex_rest <- lapply(names(fevd_fit_mex_rest), function(v) {
+  d <- as.data.frame(fevd_fit_mex_rest[[v]])
+  d$h <- seq_len(nrow(d))
+  d$variable <- v
+  d
+}) |>
+  bind_rows() |>
+  pivot_longer(
+    -c(h, variable),
+    names_to = "shock",
+    values_to = "share"
+  ) |>
+  mutate(
+    
+    variable = factor(
+      variable,
+      levels = c(
+        "r",
+        "p_mex",
+        "u_mex",
+        "r_mex"
+      ),
+      labels = c(
+        "US Fed Rate",
+        "MEX Inflation",
+        "MEX Unemployment",
+        "MEX Interest Rate"
+      )
+    ),
+    
+    shock = factor(
+      shock,
+      levels = c(
+        "r",
+        "p_mex",
+        "u_mex",
+        "r_mex"
+      ),
+      labels = c(
+        "US Fed Rate shock",
+        "MEX Inflation shock",
+        "MEX Unemployment shock",
+        "MEX Interest Rate shock"
+      )
+    ),
+    
+    share = 100 * share
+    
+  )
+
+p_fevd_mex_rest <- ggplot(
+  fevd_df_mex_rest,
+  aes(x = h, y = share, fill = shock)
+) +
+  
+  geom_area(alpha = 0.85) +
+  
+  facet_wrap(
+    ~ variable,
+    ncol = 2
+  ) +
+  
+  labs(
+    title = "Forecast error variance decomposition: Mexico quarterly VAR",
+    x = "Quarters ahead",
+    y = "Share of forecast-error variance",
+    fill = NULL
+  ) +
+  
+  theme_minimal(base_size = 11) +
+  
+  theme(
+    legend.position = "bottom"
+  )
+
+ggsave(
+  "Extension/Extension_1/Figures/FEVD_MEX_US_rest.jpeg",
+  p_fevd_mex_rest,
   width = 12,
   height = 8
 )
