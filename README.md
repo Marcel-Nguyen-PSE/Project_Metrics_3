@@ -34,6 +34,7 @@ For the first extension, I kept only US FED Rate as US variable as suggested, an
 For mexico, I noticed that some values were missing (eg, the u rate that was NA from 2005 to 2017). I retrived proper data of unemployment from the OECD data base. (this may explain the absence of consistency in the prev VAR). I have much more plausible results. 
 
 21/05/2026 : Again for Mexico, I try to use monthly data to have more observations. I proxy monthly inflation rate with monthly Consumer Price Index (CPI), it approx. doubles the sample size. Results are somehow inconsistent. 
+21/05 : I started the subsample extension : for the inflation proxy I switched to the CPI as to have monthly data for all periods, realised stationarity and lag order selection: I get VAR 2 and 4 and keep this specification.
 
 
 
