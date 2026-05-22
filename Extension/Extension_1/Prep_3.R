@@ -1,43 +1,7 @@
-library(tidyverse)
-library(readxl)
-library(rio)
-library(xtable)
-library(here)
-library(gtsummary)
-library(glue)
-library(scales)
-library(patchwork)
-library(stargazer)
-library(sandwich)
-library(lmtest)
-library(AER)
-library(car)
-library(haven)
-library(fixest) 
-library(sf)
-library(did)
-library(rdrobust)
-library(TwoWayFEWeights)
-library(Synth)
-library(fredr)
-library(tseries)
-library(urca)
-library(vars)
-library(forecast)
-library(typstable)
-library(lubridate)
-library(zoo)
-library(gridExtra)
-library(grid)
+### --- EXTENSION 1 : SPILLOVER EFFECTS ON CAN & MEX DATA PREP --- 
+# (PREP_1.R and PREP_2.R have to be ran first)
 
-
-fred_key <- Sys.getenv('FRED_API_KEY')
-
-fredr_set_key(fred_key)
-######################################################### Main dataset using fred package and monthly obs.
-
-
-### US
+# --- Data Prep for US 
 
 gdpd <- fredr(series_id = "GDPDEF",
               observation_start = as.Date('1960-01-01'),
@@ -63,7 +27,7 @@ ffr_q <- ffr %>%
   group_by(date) %>%
   summarise(r = mean(value), .groups = "drop")
 
-# final data set : 3 VAR variables
+# Final data set : 3 VAR variables
 
 macro <- gdpd %>%
   transmute(date, gdpd = value) %>%
@@ -73,15 +37,16 @@ macro <- gdpd %>%
   mutate(p = 400 * log(gdpd / lag(gdpd))) %>%    
   dplyr::select(date, p, u, r)
 
-### Inflation variable 
+# Inflation variable 
 
 macro_us <- macro %>%
   filter(date >= as.Date("1960-01-01"),
          date <  as.Date("2019-01-01")) %>%     
   dplyr::select(date, p,u,r)
 
+# --- Data Prep for Canada and Mexico
 
-### Canada 
+# Canada
 
 gdpd_can <- read_csv("Extension/Extension_1/Data/Can_GDP_Delator_Ind2017.csv") %>%
   mutate(date = as.Date(observation_date))
@@ -98,23 +63,12 @@ ffr_can <- fredr(
   observation_end   = as.Date("2019-12-31")
 )
 
-exr_can <- fredr(
-  series_id = "CCUSMA02CAM618N",
-  observation_start = as.Date("1961-01-01"),
-  observation_end   = as.Date("2019-12-31")
-)
-
-# Quarterly averages for monthly series
+# Format to quarter averages
 
 unrate_q_can <- unrate_can %>%
   mutate(date = floor_date(date, "quarter")) %>%
   group_by(date) %>%
   summarise(u_can = mean(value, na.rm = TRUE), .groups = "drop")
-
-exr_q_can <- unrate_can %>%
-  mutate(date = floor_date(date, "quarter")) %>%
-  group_by(date) %>%
-  summarise(exr_can = mean(value, na.rm = TRUE), .groups = "drop")
 
 ffr_q_can <- ffr_can %>%
   mutate(date = floor_date(date, "quarter")) %>%
@@ -128,7 +82,6 @@ macro_can <- gdpd_can %>%
   ) %>%
   left_join(unrate_q_can, by = "date") %>%
   left_join(ffr_q_can, by = "date") %>%
-  left_join(exr_q_can, by ='date') %>%
   arrange(date) %>%
   mutate(
     p_can = 400 * log(gdpd_can / lag(gdpd_can))
@@ -139,7 +92,7 @@ macro_can <- gdpd_can %>%
 macro_can_us <- macro_can %>%
   right_join(macro_us, by = 'date')
 
-### Mexico 
+# Mexico 
 
 gdpd_mex <- read_csv('Extension/Extension_1/Data/Mex_GDP_Deflator_Ind2017.csv') %>%
   mutate(date = as.Date(observation_date))
@@ -188,14 +141,20 @@ macro_mex <- gdpd_mex %>%
   dplyr::select(date, p_mex, u_mex, r_mex) %>%
   filter(date <= as.Date('2019-12-31'))
 
+# Merge table
+
 macro_mex_us <- macro_mex %>%
   right_join(macro_us, by = 'date') %>%
   na.omit()
+
+# Filter post 1990
 
 macro_mex_us_post2000 <- macro_mex %>%
   right_join(macro_us, by = 'date') %>%
   na.omit() %>%
   filter(date >= as.Date('1990-01-01'))
+
+# --- Trend plots of MEX variables ---
 
 plot_mex_p <- ggplot(macro_mex, aes(x = date)) + geom_line(aes(y = p_mex)) + theme_minimal()
 plot_mex_p
@@ -220,7 +179,7 @@ grid.arrange(
 
 dev.off()
 
-# Montly data for Mexico 
+# --- Data prep for Mexico in months ---
 
 cpi_mex_monthly <- fredr(
   series_id = "CPALTT01MXM657N",

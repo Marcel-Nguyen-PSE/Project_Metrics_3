@@ -1,7 +1,6 @@
-# This extension study the spillover effect of U.S. monetary policies on neighbour countries
-# Prep_3.R have to be ran first 
+### --- EXTENSION 1: SPILLOVER EFFECTS ON MEX AND CAN ---
 
-# Canada/U.S 
+# --- CAN/US ---
 
 var_us_can_data <- macro_can_us %>%
   dplyr::select(
@@ -14,24 +13,28 @@ var_us_can_data <- macro_can_us %>%
   ) %>%
   na.omit()
 
+# Lag selection
+
 lag_sel <- VARselect(
   var_us_can_data,
   lag.max = 8,
   type = 'const'
 )
 
-lag_sel$selection
-
 var_us_can <- VAR(
   var_us_can_data, p = 2, type = 'const'
 )
 
-summary(var_us_can)
+# Roots
 
 causality(var_us_can, cause = c("p", "u", "r"))
 
 roots_mod_can <- roots(var_us_can, modulus = TRUE)
 max(roots_mod_can)
+
+# --- IRF of Unrestricted Model ---
+
+# Interest rates US
 
 irf_can_r <- irf(
   var_us_can,
@@ -44,6 +47,8 @@ irf_can_r <- irf(
   ci = 0.95
 )
 
+# Inflation rate US
+
 irf_can_p <- irf(
   var_us_can,
   impulse = "p",
@@ -55,7 +60,7 @@ irf_can_p <- irf(
   ci = 0.95
 )
 
-# Restricted model with only US FED Rate 
+# --- Restricted model (no US. p) ---
 
 var_us_can_data_rest <- macro_can_us %>%
   dplyr::select(
@@ -66,24 +71,71 @@ var_us_can_data_rest <- macro_can_us %>%
   ) %>%
   na.omit()
 
+# Lag selection
+
 lag_sel_rest <- VARselect(
   var_us_can_data_rest,
   lag.max = 8,
   type = 'const'
 )
 
-lag_sel_rest$selection
-
 var_us_can_rest <- VAR(
   var_us_can_data_rest, p = 2, type = 'const'
 )
 
-summary(var_us_can_rest)
+# --- Final output of lag selection for CAN Restricted ---
+
+lag_selection_can_out <- as.data.frame(lag_sel_rest$criteria) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+lag_selection_can_typst <- tt(lag_selection_can_out, rownames = TRUE)
+tt_save(lag_selection_can_typst, 'Extension/Extension_1/Figures/lag_table_can_rest.typ')
+
+# --- ACF and PCF for CAN Restricted ---
+
+jpeg(
+  "Extension/Extension_1/Figures/acf_pacf_restricted.jpeg",
+  width = 2400,
+  height = 3200,
+  res = 200
+)
+
+par(mfrow = c(4, 2))
+
+acf(var_us_can_data_rest$r,
+    main = "ACF of US federal funds rate r",
+    lag.max = 20)
+pacf(var_us_can_data_rest$r,
+     main = "PACF of US federal funds rate r",
+     lag.max = 20)
+acf(var_us_can_data_rest$p_can,
+    main = "ACF of Canada inflation p_can",
+    lag.max = 20)
+pacf(var_us_can_data_rest$p_can,
+     main = "PACF of Canada inflation p_can",
+     lag.max = 20)
+acf(var_us_can_data_rest$u_can,
+    main = "ACF of Canada unemployment u_can",
+    lag.max = 20)
+pacf(var_us_can_data_rest$u_can,
+     main = "PACF of Canada unemployment u_can",
+     lag.max = 20)
+acf(var_us_can_data_rest$r_can,
+    main = "ACF of Canada interest rate r_can",
+    lag.max = 20)
+pacf(var_us_can_data_rest$r_can,
+     main = "PACF of Canada interest rate r_can",
+     lag.max = 20)
+dev.off()
+
+# Roots
 
 causality(var_us_can_rest, cause = 'r')
 
 roots_mod_can_rest <- roots(var_us_can_rest, modulus = TRUE)
 max(roots_mod_can_rest)
+
+# --- IRF ---
 
 irf_can_r_rest <- irf(
   var_us_can_rest,
@@ -95,6 +147,16 @@ irf_can_r_rest <- irf(
   runs = 500,
   ci = 0.95
 )
+
+# --- Final Output / Restricted IRF only
+
+jpeg("Extension/Extension_1/Figures/irf_can_us_r_rest.jpeg",
+     width = 1800, height = 1800, res = 150)
+par(mfrow = c(2, 2))
+plot(irf_can_r_rest, plot.type = "single")
+dev.off()
+
+# --- Final Output / Comparison of both models ---
 
 jpeg(
   "Extension/Extension_1/Figures/irf_full_vs_restricted.jpeg",
@@ -162,7 +224,9 @@ abline(h = 0, col = "red")
 
 dev.off()
 
-h <- c(1, 4, 8, 12)
+# --- Computation of Mean Square Errors --- 
+
+horizons <- c(1, 4, 8, 12)
 
 mse_results <- data.frame()
 
@@ -192,58 +256,16 @@ for(h in horizons) {
     )
   )
 }
+
+# --- Final Output ---
+
 mse_results <- mse_results %>% 
   mutate(across(where(is.numeric), ~ round(.x, 3)))
 mse_results_table <- tt_save(tt(mse_results, rownames = FALSE), 'Extension/Extension_1/Figures/MSE_rest_full.typ')
 
-jpeg("Extension/Extension_1/Figures/irf_can_us_r_rest.jpeg",
-     width = 1800, height = 1800, res = 150)
-par(mfrow = c(2, 2))
-plot(irf_can_r_rest, plot.type = "single")
-dev.off()
+# --- Mexico ---
 
-lag_selection_can_out <- as.data.frame(lag_sel_rest$criteria) %>%
-  mutate(across(where(is.numeric), ~ round(.x, 3)))
-
-lag_selection_can_typst <- tt(lag_selection_can_out, rownames = TRUE)
-tt_save(lag_selection_can_typst, 'Extension/Extension_1/Figures/lag_table_can_rest.typ')
-
-jpeg(
-  "Extension/Extension_1/Figures/acf_pacf_restricted.jpeg",
-  width = 2400,
-  height = 3200,
-  res = 200
-)
-
-par(mfrow = c(4, 2))
-
-acf(var_us_can_data_rest$r,
-    main = "ACF of US federal funds rate r",
-    lag.max = 20)
-pacf(var_us_can_data_rest$r,
-     main = "PACF of US federal funds rate r",
-     lag.max = 20)
-acf(var_us_can_data_rest$p_can,
-    main = "ACF of Canada inflation p_can",
-    lag.max = 20)
-pacf(var_us_can_data_rest$p_can,
-     main = "PACF of Canada inflation p_can",
-     lag.max = 20)
-acf(var_us_can_data_rest$u_can,
-    main = "ACF of Canada unemployment u_can",
-    lag.max = 20)
-pacf(var_us_can_data_rest$u_can,
-     main = "PACF of Canada unemployment u_can",
-     lag.max = 20)
-acf(var_us_can_data_rest$r_can,
-    main = "ACF of Canada interest rate r_can",
-    lag.max = 20)
-pacf(var_us_can_data_rest$r_can,
-     main = "PACF of Canada interest rate r_can",
-     lag.max = 20)
-dev.off()
-
-# Mexico/US
+# --- Lag selection ---
 
 var_us_mex_data <- macro_mex_us_post2000 %>%
   dplyr::select(p, u, r, p_mex, u_mex, r_mex) %>%
@@ -255,7 +277,7 @@ lag_sel_mex <- VARselect(
   type = 'const'
 )
 
-lag_sel_mex$selection
+# --- Final Output of lag selection ---
 
 lag_selection_mex_out <- as.data.frame(lag_sel_mex$criteria) %>%
   mutate(across(where(is.numeric), ~ round(.x, 3)))
@@ -267,12 +289,16 @@ var_us_mex <- VAR(
   var_us_mex_data, p = 2, type = 'const'
 )
 
-summary(var_us_mex)
+# Roots
 
 causality(var_us_mex, cause = c("p", "u", "r"))
 
 roots_mod_mex <- roots(var_us_mex, modulus = TRUE)
 max(roots_mod_mex)
+
+# --- IRF ---
+
+# Interest rate
 
 irf_mex_r <- irf(
   var_us_mex,
@@ -285,6 +311,8 @@ irf_mex_r <- irf(
   ci = 0.95
 )
 
+# Inflation
+
 irf_mex_p <- irf(
   var_us_mex,
   impulse = "p",
@@ -296,17 +324,7 @@ irf_mex_p <- irf(
   ci = 0.95
 )
 
-par(mfrow = c(2, 2))
-
-plot(
-  irf_mex_r,
-  plot.type = "single"
-)
-
-plot(
-  irf_mex_p,
-  plot.type = 'single'
-)
+# --- Final Output ---
 
 jpeg("Extension/Extension_1/Figures/irf_mex_us_r.jpeg",
      width = 1800, height = 1800, res = 150)
@@ -322,7 +340,7 @@ dev.off()
 
 plot(var_us_mex_data$r_mex)
 
-# Restricted 
+# --- Restricted MEX model ---
 
 var_us_mex_data_rest <- macro_mex_us %>%
   dplyr::select(
@@ -333,24 +351,26 @@ var_us_mex_data_rest <- macro_mex_us %>%
   ) %>%
   na.omit()
 
+# Lag selection
+
 lag_sel_rest_mex <- VARselect(
   var_us_mex_data_rest,
   lag.max = 8,
   type = 'const'
 )
 
-lag_sel_rest_mex$selection
-
 var_us_mex_rest <- VAR(
   var_us_mex_data_rest, p = 2, type = 'const'
 )
 
-summary(var_us_can_rest)
+# Roots
 
-causality(var_us_can_rest, cause = 'r')
+causality(var_us_mex_rest, cause = 'r')
 
-roots_mod_can_rest <- roots(var_us_can_rest, modulus = TRUE)
-max(roots_mod_can_rest)
+roots_mod_mex_rest <- roots(var_us_mex_rest, modulus = TRUE)
+max(roots_mod_mex_rest)
+
+# --- IRF ---
 
 irf_can_r_rest <- irf(
   var_us_can_rest,
@@ -363,10 +383,13 @@ irf_can_r_rest <- irf(
   ci = 0.95
 )
 
-#### FEVD decomp
+# --- FEVD MEX/CAN ---
+
 fevd_fit_mex <- fevd(var_us_mex, n.ahead = 20)
 fevd_fit_mex_rest <- fevd(var_us_mex_rest, n.ahead = 20)
 fevd_fit_can <- fevd(var_us_can_rest, n.ahead = 20)
+
+# Function that creates a plot of contribution as in the slides
 
 fevd_df <- lapply(names(fevd_fit_can), function(v) {
   d <- as.data.frame(fevd_fit_can[[v]])
@@ -383,10 +406,8 @@ fevd_df <- lapply(names(fevd_fit_can), function(v) {
   mutate(
     variable = factor(
       variable,
-      levels = c("p", "u", "r", "p_can", "u_can", "r_can"),
+      levels = c("r", "p_can", "u_can", "r_can"),
       labels = c(
-        "US Inflation",
-        "US Unemployment",
         "US Fed Rate",
         "CAN Inflation",
         "CAN Unemployment",
@@ -395,10 +416,8 @@ fevd_df <- lapply(names(fevd_fit_can), function(v) {
     ),
     shock = factor(
       shock,
-      levels = c("p", "u", "r", "p_can", "u_can", "r_can"),
+      levels = c("r", "p_can", "u_can", "r_can"),
       labels = c(
-        "US Inflation shock",
-        "US Unemployment shock",
         "US Fed Rate shock",
         "CAN Inflation shock",
         "CAN Unemployment shock",
@@ -408,6 +427,8 @@ fevd_df <- lapply(names(fevd_fit_can), function(v) {
     share = 100 * share
   )
 
+# --- Plots ---
+
 p_fevd <- ggplot(fevd_df, aes(h, share, fill = shock)) +
   geom_area(alpha = 0.85) +                                 # Stacked area plot
   facet_wrap(~ variable, ncol = 3) +
@@ -415,8 +436,6 @@ p_fevd <- ggplot(fevd_df, aes(h, share, fill = shock)) +
        x = "Quarters ahead", y = "Share of variance", fill = NULL) +
   scale_fill_manual(
     values = c(
-      "US Inflation shock"      = "#08306B",
-      "US Unemployment shock"   = "#2171B5",
       "US Fed Rate shock"       = "#6BAED6",
       "CAN Inflation shock"     = "#00441B",
       "CAN Unemployment shock"  = "#238B45",
@@ -426,7 +445,11 @@ p_fevd <- ggplot(fevd_df, aes(h, share, fill = shock)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 
+# --- FEVD plot for CAN ---
+
 ggsave('Extension/Extension_1/Figures/FEVD_CAN_US.jpeg', p_fevd, width = 12, height = 8)
+
+# --- FEVD for MEX ---
 
 fevd_df_mex <- lapply(names(fevd_fit_mex), function(v) {
   d <- as.data.frame(fevd_fit_mex[[v]])
@@ -468,6 +491,8 @@ fevd_df_mex <- lapply(names(fevd_fit_mex), function(v) {
     share = 100 * share
   )
 
+# --- FEVD plot output ---
+
 p_fevd_mex <- ggplot(fevd_df_mex, aes(h, share, fill = shock)) +
   geom_area(alpha = 0.85) +                      
   facet_wrap(~ variable, ncol = 3) +
@@ -488,13 +513,15 @@ p_fevd_mex <- ggplot(fevd_df_mex, aes(h, share, fill = shock)) +
 
 ggsave('Extension/Extension_1/Figures/FEVD_MEX_US.jpeg', p_fevd_mex, width = 12, height = 8)
 
-### Robustness cheks 
+# --- MEX POST 2000 ---
 
 # Check for mexico instability 
 
-var_us_mex_data_2001 <- macro_mex_us_post2001 %>%
+var_us_mex_data_2001 <- macro_mex_us_post2000 %>%
   dplyr::select(p, u, r, p_mex, u_mex, r_mex) %>%
   na.omit()
+
+# Lag Selection
 
 lag_sel_mex_2001 <- VARselect(
   var_us_mex_data_2001,
@@ -502,18 +529,18 @@ lag_sel_mex_2001 <- VARselect(
   type = 'const'
 )
 
-lag_sel_mex_2001$selection
-
 var_us_mex_2001 <- VAR(
   var_us_mex_data_2001, p = 2, type = 'const'
 )
 
-summary(var_us_mex_2001)
+# Roots
 
 causality(var_us_mex_2001, cause = c("p", "u", "r"))
 
 roots_mod_mex_2001 <- roots(var_us_mex_2001, modulus = TRUE)
 max(roots_mod_mex_2001)
+
+# --- IRF ---
 
 irf_mex_r_2001 <- irf(
   var_us_mex_2001,
@@ -526,7 +553,7 @@ irf_mex_r_2001 <- irf(
   ci = 0.95
 )
 
-### VAR for MEX (monthly revised)
+# --- MEX Monthly model ---
 
 var_us_mex_monthly <- macro_mex_us_monthly %>%
   dplyr::select(r_us, p_monthly, u_monthly, r_monthly) %>%
@@ -538,27 +565,24 @@ lag_sel_mex_monthly <- VARselect(
   type = 'const'
 )
 
-lag_sel_mex_monthly$selection
-
 lag_selection_mex_out_monthly <- as.data.frame(lag_sel_mex_monthly$criteria) %>%
   mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+# --- Final output 
 
 lag_selection_mex_monthly_typst <- tt(lag_selection_mex_out_monthly, rownames = TRUE)
 tt_save(lag_selection_mex_monthly_typst, 'Extension/Extension_1/Figures/lag_table_mex_rest_monthly.typ')
 
-var_us_mex_monthly <- VAR(
-  var_us_mex_monthly, p = 2, type = 'const'
+# --- IRF ---
+
+var_us_mex_monthly_fit <- VAR(
+  var_us_mex_monthly,
+  p = 2,
+  type = "const"
 )
 
-summary(var_us_mex_monthly)
-
-causality(var_us_mex_monthly, cause = c("p", "u", "r"))
-
-roots_mod_mex_monthly <- roots(var_us_mex_monthly, modulus = TRUE)
-max(roots_mod_mex_monthly)
-
 irf_mex_r_monthly <- irf(
-  var_us_mex_monthly,
+  var_us_mex_monthly_fit,
   impulse = "r_us",
   response = c('p_monthly', 'u_monthly', 'r_monthly'),
   n.ahead = 20,
@@ -567,6 +591,8 @@ irf_mex_r_monthly <- irf(
   runs = 500,
   ci = 0.95
 )
+
+# --- Final Output ---
 
 jpeg(
   "Extension/Extension_1/Figures/irf_mex_r_monthly.jpeg",
@@ -579,8 +605,10 @@ plot(irf_mex_r_monthly)
 
 dev.off()
 
+# --- FEVD Decomp ---
+
 fevd_fit_mex_monthly <- fevd(
-  var_us_mex_monthly,
+  var_us_mex_monthly_fit,
   n.ahead = 20
 )
 
@@ -640,12 +668,16 @@ p_fevd_mex_monthly <- ggplot(
     legend.position = "bottom"
   )
 
+# --- Final output
+
 ggsave(
   "Extension/Extension_1/Figures/FEVD_MEX_monthly_US.jpeg",
   p_fevd_mex_monthly,
   width = 12,
   height = 8
 )
+
+# --- Application with restricted ---
 
 fevd_fit_mex_rest <- fevd(
   var_us_mex_rest,
@@ -726,6 +758,8 @@ p_fevd_mex_rest <- ggplot(
   theme(
     legend.position = "bottom"
   )
+
+# --- Final output ---
 
 ggsave(
   "Extension/Extension_1/Figures/FEVD_MEX_US_rest.jpeg",

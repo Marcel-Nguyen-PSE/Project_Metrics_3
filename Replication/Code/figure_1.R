@@ -1,7 +1,4 @@
-
-#########################################################
-# Load objects from preliminaries
-#########################################################
+# --- Data prep (load R objects) ---
 
 var_1 <- readRDS(
   "Replication/R_objects/var_1.rds"
@@ -10,9 +7,9 @@ var_1 <- readRDS(
 macro_1960_2000 <- readRDS(
   "Replication/R_objects/macro_1960_2000.rds"
 )
-###### VAR Descriptive statistics (Table 1) 
+### --- VAR DESCRIPTIVE STATISTICS ---- ### 
 
-### Panel A : Manual Granger Causality table -> get all p-values from each sub-regression
+# --- Panel A : Manual Granger Causality table -> get all p-values from each sub-regression --- 
 
 # p dependent variable 
 
@@ -73,7 +70,7 @@ colnames(table_1) <- c("p", "u", "r")
 
 round(table_1, 2)
 
-# Final output
+# --- Final output of Granger Causality ---
 
 table_1_panelA <- tt(
   data.frame(table_1),
@@ -85,7 +82,7 @@ tt_save(table_1_panelA, 'Replication/Figures/Fig_1/Typst/table_1_panelA_Granger.
 stargazer(table_1, type = 'latex', out = 'Replication/Figures/Fig_1/LaTeX/table_1_panelA_Granger.tex')
 
 
-### Variance decomposition : Panel B, C, D
+# --- Variance decomposition ---
 
 var_comp <- fevd(var_1, n.ahead = 12)
 
@@ -103,7 +100,7 @@ table1_var_comp <- tt(data.frame(var_comp_comb), rownames = FALSE, align = 'cent
 stargazer(data.frame(var_comp_comb), type = 'latex', out = 'Replication/Figures/Fig_1/Latex/table_1_var_decomp_comb.tex')
 tt_save(table1_var_comp, 'Replication/Figures/Fig_1/Typst/table_1_var_decomp_comb.typ')
 
-### Forecast errors
+# --- Forecast errors decomposition ---
 
 fe <- predict(var_1, n.ahead = 12, ci = 0.95)
 
@@ -118,6 +115,8 @@ mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
 mutate(horizon = c(1,4,8,12))
 
 table1_fe_err <- tt(data.frame(fe_err_comb), rownames = FALSE, align = 'center')
+
+# --- Final output ---
 
 stargazer(data.frame(fe_err_comb), type = 'latex', out = 'Replication/Figures/Fig_1/LaTeX/table_1_forecast_err.tex')
 tt_save(table1_fe_err, 'Replication/Figures/Fig_1/Typst/table_1_forecast_err.typ')

@@ -1,3 +1,7 @@
+### --- DATA PREP 1 --- ###
+
+# --- Load packages ---
+
 library(tidyverse)
 library(readxl)
 library(rio)
@@ -30,11 +34,13 @@ library(zoo)
 library(gridExtra)
 library(grid)
 
+# --- FREDR API KEY ---
 
 fred_key <- Sys.getenv('FRED_API_KEY')
 
 fredr_set_key(fred_key)
-######################################################### Main dataset using fred package and monthly obs.
+
+# --- 1960-2000 US Macro Data Set ---
 
 gdpd <- fredr(series_id = "GDPDEF",
               observation_start = as.Date('1955-01-01'),
@@ -48,7 +54,7 @@ ffr <- fredr(series_id = "FEDFUNDS",
              observation_start = as.Date('1955-01-01'),
              observation_end   = as.Date('2019-12-31'))
 
-# Quarterly averages for monthly series 
+# Quarterly averages for monthly series (as in the paper)
 
 unrate_q <- unrate %>%
   mutate(date = floor_date(date, "quarter")) %>% 
@@ -60,7 +66,7 @@ ffr_q <- ffr %>%
   group_by(date) %>%
   summarise(r = mean(value), .groups = "drop")
 
-# final data set : 3 VAR variables
+# --- Final Data Set ---
 
 macro <- gdpd %>%
   transmute(date, gdpd = value) %>%
@@ -69,8 +75,6 @@ macro <- gdpd %>%
   arrange(date) %>%
   mutate(p = 400 * log(gdpd / lag(gdpd))) %>%    
   dplyr::select(date, p, u, r)
-
-### Inflation variable 
 
 macro_1960_2000 <- macro %>%
   filter(date >= as.Date("1960-01-01"),
