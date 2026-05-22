@@ -270,3 +270,78 @@ export_png_table(
   width = 3000,
   height = 700
 )
+
+
+#########################################################
+# Benchmark VARs: pre- and post-crisis
+#########################################################
+
+var_precrisis <- VAR(
+  y = macro_monthly_precrisis,
+  p = 2,
+  type = "const"
+)
+
+var_postcrisis <- VAR(
+  y = macro_monthly_postcrisis,
+  p = 4,
+  type = "const"
+)
+
+#########################################################
+# IRFs: monetary-policy shock
+#########################################################
+
+irf_precrisis <- irf(
+  var_precrisis,
+  impulse = "r",
+  response = c("p", "u", "r"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
+irf_postcrisis <- irf(
+  var_postcrisis,
+  impulse = "r",
+  response = c("p", "u", "r"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
+#########################################################
+# Export IRFs
+#########################################################
+
+dir.create(
+  "Extension/PrePost/Figures",
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+jpeg(
+  "Extension/PrePost/Figures/irf_precrisis.jpeg",
+  width = 1800,
+  height = 900,
+  res = 150
+)
+
+plot(irf_precrisis)
+
+dev.off()
+
+jpeg(
+  "Extension/PrePost/Figures/irf_postcrisis.jpeg",
+  width = 1800,
+  height = 900,
+  res = 150
+)
+
+plot(irf_postcrisis)
+
+dev.off()
