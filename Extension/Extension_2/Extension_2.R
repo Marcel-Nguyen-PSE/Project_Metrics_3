@@ -19,7 +19,7 @@ macro_monthly <- cpi %>%
   left_join(unrate_monthly, by = "date") %>%
   left_join(ffr_monthly, by = "date") %>%
   arrange(date) %>%
-  mutate(p = 1200 * log(cpi / lag(cpi))) %>%
+  mutate(p = 1200 * log(cpi / lag(cpi))) %>%     # monthly CPI growth × 12 × 100 ie p = annualized monthly inflation, in % per year.
   dplyr::select(date, p, u, r) %>%
   drop_na()
 
@@ -486,40 +486,44 @@ plot(irf_postcrisis_full, plot.type = "single", ask = FALSE)
 dev.off()
 
 
+
 #########################################################
 # Backward-looking Taylor rule: pre/post crisis extension
 #########################################################
 
-# Monthly Taylor-rule coefficients : annual Taylor-rule coefficients are divided by 12.
+# Taylor-rule coefficients
+# p is already annualized monthly inflation: p = 1200 * log(cpi / lag(cpi))
+# Therefore we do NOT divide by 12.
 
-fp_back_monthly <- 1.5 / 12
-fu_back_monthly <- (0.5 / 12) * (-2.5)
+fp_back <- 1.5
+fu_back <- 0.5 * (-2.5)
 
-# Construct monetary-policy residual ra
+#########################################################
+# Construct Taylor-rule monetary-policy residual ra
 #########################################################
 
-# ra = part of the policy rate not explained by the systematic Taylor-rule response.
+# Theoritical Taylor rule: r = fp_back*p + fu_back*u + ra
+# So we should have : ra = r - fp_back*p - fu_back*u 
+# but to keep consistency with formula of figure 3 in the replication, we write:
+# ra = r + fp_back*p - fu_back*u
 
 taylor_backward_precrisis <- macro_monthly_precrisis %>%
   mutate(
-    ra = r + fp_back_monthly * p - fu_back_monthly * u
+    ra = r + fp_back * p - fu_back * u
   ) %>%
   drop_na() %>%
   dplyr::select(ra, p, u)
 
 taylor_backward_postcrisis <- macro_monthly_postcrisis %>%
   mutate(
-    ra = r + fp_back_monthly * p - fu_back_monthly * u
+    ra = r + fp_back * p - fu_back * u
   ) %>%
   drop_na() %>%
   dplyr::select(ra, p, u)
 
-
-# Estimate VARs on Taylor-rule transformed variables
 #########################################################
-
-# pre-crisis: VAR(2)
-# post-crisis: VAR(4)
+# Estimate VARs
+#########################################################
 
 var_back_precrisis <- VAR(
   y = taylor_backward_precrisis,
@@ -533,11 +537,9 @@ var_back_postcrisis <- VAR(
   type = "const"
 )
 
-# Compute IRFs to a monetary-policy shock
 #########################################################
-
-# impulse = "ra" means the shock is the Taylor-rule monetary-policy residual.
-# This is different from the recursive VAR shock to r.
+# Compute IRFs to Taylor-rule monetary-policy shock
+#########################################################
 
 irf_back_precrisis <- irf(
   var_back_precrisis,
@@ -561,12 +563,9 @@ irf_back_postcrisis <- irf(
   ci = 0.66
 )
 
-# Recover inflation, unemployment, and real-rate responses
 #########################################################
-
-# The VAR is estimated on ra, p, u.
-# To recover the nominal policy-rate response: r_nominal = ra + fp*p + fu*u
-# Then real rate response is: r_real = r_nominal - p
+# Recover nominal and real interest-rate responses
+#########################################################
 
 recover_irf_backward <- function(irf_obj, fp, fu) {
   
@@ -574,7 +573,10 @@ recover_irf_backward <- function(irf_obj, fp, fu) {
   p  <- irf_obj$irf$ra[, "p"]
   u  <- irf_obj$irf$ra[, "u"]
   
+  # Since ra = r + fp*p - fu*u even though not algebraically correct, we keep the initial nominal rate response :
   r_nominal <- ra + fp * p + fu * u
+  
+  # Real rate response:
   r_real <- r_nominal - p
   
   list(
@@ -586,17 +588,18 @@ recover_irf_backward <- function(irf_obj, fp, fu) {
 
 res_back_precrisis <- recover_irf_backward(
   irf_back_precrisis,
-  fp_back_monthly,
-  fu_back_monthly
+  fp_back,
+  fu_back
 )
 
 res_back_postcrisis <- recover_irf_backward(
   irf_back_postcrisis,
-  fp_back_monthly,
-  fu_back_monthly
+  fp_back,
+  fu_back
 )
 
-# Export backward-looking Taylor-rule IRF comparison
+#########################################################
+# Export comparison plot
 #########################################################
 
 dir.create(
@@ -616,7 +619,7 @@ horizon <- 0:24
 
 par(mfrow = c(2, 2))
 
-# Inflation response
+# Inflation
 ylim_p <- range(res_back_precrisis$p, res_back_postcrisis$p)
 
 plot(
@@ -641,7 +644,7 @@ legend(
   bty = "n"
 )
 
-# Unemployment response
+# Unemployment
 ylim_u <- range(res_back_precrisis$u, res_back_postcrisis$u)
 
 plot(
@@ -658,7 +661,7 @@ plot(
 lines(horizon, res_back_postcrisis$u, lty = 2, lwd = 2)
 abline(h = 0, col = "red")
 
-# Real interest-rate response
+# Real interest rate
 ylim_r <- range(res_back_precrisis$r_real, res_back_postcrisis$r_real)
 
 plot(
@@ -676,6 +679,3 @@ lines(horizon, res_back_postcrisis$r_real, lty = 2, lwd = 2)
 abline(h = 0, col = "red")
 
 dev.off()
-
-irf_back_precrisis$irf$ra[1, "ra"]
-irf_back_postcrisis$irf$ra[1, "ra"]
