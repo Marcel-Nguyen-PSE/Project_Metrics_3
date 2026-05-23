@@ -1,5 +1,5 @@
 ### --- EXTENSION 1 : SPILLOVER EFFECTS ON CAN & MEX DATA PREP --- 
-# (PREP_1.R and PREP_2.R have to be ran first)
+# (PREP_1.R and PREP_2.R and Prep_3.R have to be ran first)
 
 # --- Data Prep for US 
 
