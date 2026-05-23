@@ -141,3 +141,5 @@ For mexico, I noticed that some values were missing (eg, the u rate that was NA 
 21/05 : I started the subsample extension : for the inflation proxy I switched to the CPI as to have monthly data for all periods, realised stationarity and lag order selection: I get VAR 2 and 4 and keep this specification.
 
 23/05/2026: I wrote the final readme. I also include the coefficients of the monetary rule of fig3 inside for comprehensiveness instead of plain values. 
+
+23/05 : I computed better IRFs for extension on subsamples, concentrated analysis on response to monetary shock for recursive VAR. Then I tried to build the structural VAR. i got problems with the IRFS: in figure 3 to compute the best IRFs, authors used an unusual sign convention. Firstly for backward-looking Taylor rule, one can see that post crisis dynamics are not really stable for unemployment. For forward looking taylor rule, I used k = 12 months at the beginning but got weird IRFs so I checked fu_fwd = 13.55 which showed that forward-looking rule is unstable and 1 - fwd_precrisis$fr_raw = -0.0845 so the fixed-point correction is blowing up the coefficients. I try again using k = 4
