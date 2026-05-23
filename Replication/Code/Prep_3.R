@@ -65,7 +65,7 @@ irf_var_3 <- irf(
 )
 
 jpeg(
-  "Extension/Extension_2/irf_lag_comparison.jpeg",
+  "Replication/Figures/Preliminaries/irf_lag_comparison.jpeg",
   width = 2400,
   height = 800,
   res = 200

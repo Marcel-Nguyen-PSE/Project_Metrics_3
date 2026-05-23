@@ -171,11 +171,6 @@ roots_postcrisis <- data.frame(
 # Export tables for Typst
 #########################################################
 
-
-dir.create("Extension/PrePost/Tables/PNG",
-           recursive = TRUE,
-           showWarnings = FALSE)
-
 export_png_table <- function(table_obj, filename,
                              width = 2200,
                              height = 800) {
@@ -184,7 +179,7 @@ export_png_table <- function(table_obj, filename,
   rownames(table_obj) <- NULL
   
   png(
-    paste0("Extension/PrePost/Tables/PNG/", filename, ".png"),
+    paste0("Extension/Extension_2/Figures/", filename, ".png"),
     width = width,
     height = height,
     res = 180
@@ -318,14 +313,8 @@ irf_postcrisis <- irf(
 # Export IRFs
 #########################################################
 
-dir.create(
-  "Extension/PrePost/Figures",
-  recursive = TRUE,
-  showWarnings = FALSE
-)
-
 jpeg(
-  "Extension/PrePost/Figures/irf_precrisis.jpeg",
+  "Extension/Extension_2/Figures/irf_precrisis.jpeg",
   width = 1800,
   height = 900,
   res = 150
@@ -336,7 +325,7 @@ plot(irf_precrisis)
 dev.off()
 
 jpeg(
-  "Extension/PrePost/Figures/irf_postcrisis.jpeg",
+  "Extension/Extension_2/Figures/irf_postcrisis.jpeg",
   width = 1800,
   height = 900,
   res = 150
