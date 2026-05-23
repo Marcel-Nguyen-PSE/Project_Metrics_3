@@ -3,7 +3,7 @@
 This repo replicates the paper 'Monetary Policy Forecasts and Shocks Spillovers of U.S on Canada and Mexico: replication and
 extension of a structural VAR model'.
 
-# Replication folder:
+# Replication 
 
 ## Code summary
 0) Data prep files: Prep_1.R, Prep_2.R and Prep_3.R have to be fully ran first.
