@@ -40,7 +40,7 @@ NB: (**.typ** and **.tex** only change the file format, not the content)
 
 ### 1) Extension_1 
 - **Can_GDP_Deflator_Ind2017.csv** : quarterly observations from 1961 to 2023 of GDP deflator index (base 2017) for Canada (source: OECD DATABASE PORTAL)
-- **LRHUTTTTMXM1562** : monthly observations from 1987 to 2026 of Mexican unemployment rate for individuals above 15 years old (source: FRED DATABASE)
+- **LRHUTTTTMXM156S** : monthly observations from 1987 to 2026 of Mexican unemployment rate for individuals above 15 years old (source: FRED DATABASE)
 - **Mex_GDP_Deflator_Ind2017.csv** : quarterly observations from 1961 to 2023 of GDP deflator index (base 2017) for Mexico (source: OECD DATABASE PORTAL)
 
 ## Code summary 
