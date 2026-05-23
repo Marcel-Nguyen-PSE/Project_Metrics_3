@@ -310,27 +310,372 @@ irf_postcrisis <- irf(
 )
 
 #########################################################
-# Export IRFs
+# Side-by-side IRFs: pre-crisis vs post-crisis response to monetary-policy shock IRF
 #########################################################
 
+dir.create(
+  "Extension/Extension_2/Figures",
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
 jpeg(
-  "Extension/Extension_2/Figures/irf_precrisis.jpeg",
+  "Extension/Extension_2/Figures/irf_pre_post_comparison.jpeg",
+  width = 2400,
+  height = 1800,
+  res = 200
+)
+
+h <- 0:24
+
+par(mfrow = c(3, 2), mar = c(4, 4, 3, 1))
+
+responses <- c("p", "u", "r")
+titles <- c(
+  "Inflation response",
+  "Unemployment response",
+  "Interest rate response"
+)
+
+for (i in seq_along(responses)) {
+  
+  response <- responses[i]
+  
+  ylim_common <- range(
+    irf_precrisis$irf$r[, response],
+    irf_precrisis$Lower$r[, response],
+    irf_precrisis$Upper$r[, response],
+    irf_postcrisis$irf$r[, response],
+    irf_postcrisis$Lower$r[, response],
+    irf_postcrisis$Upper$r[, response]
+  )
+  
+  plot(
+    h,
+    irf_precrisis$irf$r[, response],
+    type = "l",
+    lwd = 2,
+    ylim = ylim_common,
+    main = paste(titles[i], "- Pre-crisis"),
+    xlab = "Months",
+    ylab = "Response"
+  )
+  lines(h, irf_precrisis$Lower$r[, response], lty = 2, col = "red")
+  lines(h, irf_precrisis$Upper$r[, response], lty = 2, col = "red")
+  abline(h = 0, col = "red")
+  
+  plot(
+    h,
+    irf_postcrisis$irf$r[, response],
+    type = "l",
+    lwd = 2,
+    ylim = ylim_common,
+    main = paste(titles[i], "- Post-crisis"),
+    xlab = "Months",
+    ylab = "Response"
+  )
+  lines(h, irf_postcrisis$Lower$r[, response], lty = 2, col = "red")
+  lines(h, irf_postcrisis$Upper$r[, response], lty = 2, col = "red")
+  abline(h = 0, col = "red")
+}
+
+dev.off()
+
+#for complement : full irfs
+
+irf_precrisis_full <- irf(
+  var_precrisis,
+  impulse = c("p", "u", "r"),
+  response = c("p", "u", "r"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
+irf_postcrisis_full <- irf(
+  var_postcrisis,
+  impulse = c("p", "u", "r"),
+  response = c("p", "u", "r"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
+jpeg(
+  "Extension/Extension_2/Figures/irf_precrisis_full.jpeg",
   width = 1800,
-  height = 900,
+  height = 1800,
   res = 150
 )
 
-plot(irf_precrisis)
+plot(irf_precrisis_full, plot.type = "single")
 
 dev.off()
 
 jpeg(
-  "Extension/Extension_2/Figures/irf_postcrisis.jpeg",
+  "Extension/Extension_2/Figures/irf_postcrisis_full.jpeg",
   width = 1800,
-  height = 900,
+  height = 1800,
   res = 150
 )
 
-plot(irf_postcrisis)
+plot(irf_postcrisis_full, plot.type = "single")
 
 dev.off()
+
+#########################################################
+# Full IRFs: pre-crisis and post-crisis
+#########################################################
+
+irf_precrisis_full <- irf(
+  var_precrisis,
+  impulse = c("p", "u", "r"),
+  response = c("p", "u", "r"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
+irf_postcrisis_full <- irf(
+  var_postcrisis,
+  impulse = c("p", "u", "r"),
+  response = c("p", "u", "r"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
+dir.create(
+  "Extension/Extension_2/Figures",
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+jpeg(
+  "Extension/Extension_2/Figures/irf_precrisis_full.jpeg",
+  width = 1800,
+  height = 1800,
+  res = 150
+)
+
+par(mfrow = c(3, 3), ask = FALSE)
+
+plot(irf_precrisis_full, plot.type = "single", ask = FALSE)
+
+dev.off()
+
+jpeg(
+  "Extension/Extension_2/Figures/irf_postcrisis_full.jpeg",
+  width = 1800,
+  height = 1800,
+  res = 150
+)
+
+par(mfrow = c(3, 3), ask = FALSE)
+
+plot(irf_postcrisis_full, plot.type = "single", ask = FALSE)
+
+dev.off()
+
+
+#########################################################
+# Backward-looking Taylor rule: pre/post crisis extension
+#########################################################
+
+# Monthly Taylor-rule coefficients : annual Taylor-rule coefficients are divided by 12.
+
+fp_back_monthly <- 1.5 / 12
+fu_back_monthly <- (0.5 / 12) * (-2.5)
+
+# Construct monetary-policy residual ra
+#########################################################
+
+# ra = part of the policy rate not explained by the systematic Taylor-rule response.
+
+taylor_backward_precrisis <- macro_monthly_precrisis %>%
+  mutate(
+    ra = r + fp_back_monthly * p - fu_back_monthly * u
+  ) %>%
+  drop_na() %>%
+  dplyr::select(ra, p, u)
+
+taylor_backward_postcrisis <- macro_monthly_postcrisis %>%
+  mutate(
+    ra = r + fp_back_monthly * p - fu_back_monthly * u
+  ) %>%
+  drop_na() %>%
+  dplyr::select(ra, p, u)
+
+
+# Estimate VARs on Taylor-rule transformed variables
+#########################################################
+
+# pre-crisis: VAR(2)
+# post-crisis: VAR(4)
+
+var_back_precrisis <- VAR(
+  y = taylor_backward_precrisis,
+  p = 2,
+  type = "const"
+)
+
+var_back_postcrisis <- VAR(
+  y = taylor_backward_postcrisis,
+  p = 4,
+  type = "const"
+)
+
+# Compute IRFs to a monetary-policy shock
+#########################################################
+
+# impulse = "ra" means the shock is the Taylor-rule monetary-policy residual.
+# This is different from the recursive VAR shock to r.
+
+irf_back_precrisis <- irf(
+  var_back_precrisis,
+  impulse = "ra",
+  response = c("ra", "p", "u"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 500,
+  ci = 0.66
+)
+
+irf_back_postcrisis <- irf(
+  var_back_postcrisis,
+  impulse = "ra",
+  response = c("ra", "p", "u"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 500,
+  ci = 0.66
+)
+
+# Recover inflation, unemployment, and real-rate responses
+#########################################################
+
+# The VAR is estimated on ra, p, u.
+# To recover the nominal policy-rate response: r_nominal = ra + fp*p + fu*u
+# Then real rate response is: r_real = r_nominal - p
+
+recover_irf_backward <- function(irf_obj, fp, fu) {
+  
+  ra <- irf_obj$irf$ra[, "ra"]
+  p  <- irf_obj$irf$ra[, "p"]
+  u  <- irf_obj$irf$ra[, "u"]
+  
+  r_nominal <- ra + fp * p + fu * u
+  r_real <- r_nominal - p
+  
+  list(
+    p = p,
+    u = u,
+    r_real = r_real
+  )
+}
+
+res_back_precrisis <- recover_irf_backward(
+  irf_back_precrisis,
+  fp_back_monthly,
+  fu_back_monthly
+)
+
+res_back_postcrisis <- recover_irf_backward(
+  irf_back_postcrisis,
+  fp_back_monthly,
+  fu_back_monthly
+)
+
+# Export backward-looking Taylor-rule IRF comparison
+#########################################################
+
+dir.create(
+  "Extension/Extension_2/Figures",
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+jpeg(
+  "Extension/Extension_2/Figures/irf_taylor_backward_pre_post.jpeg",
+  width = 1800,
+  height = 1200,
+  res = 150
+)
+
+horizon <- 0:24
+
+par(mfrow = c(2, 2))
+
+# Inflation response
+ylim_p <- range(res_back_precrisis$p, res_back_postcrisis$p)
+
+plot(
+  horizon,
+  res_back_precrisis$p,
+  type = "l",
+  lwd = 2,
+  ylim = ylim_p,
+  main = "Inflation response",
+  xlab = "Months",
+  ylab = "Percent"
+)
+
+lines(horizon, res_back_postcrisis$p, lty = 2, lwd = 2)
+abline(h = 0, col = "red")
+
+legend(
+  "topright",
+  legend = c("Pre-crisis", "Post-crisis"),
+  lty = c(1, 2),
+  lwd = 2,
+  bty = "n"
+)
+
+# Unemployment response
+ylim_u <- range(res_back_precrisis$u, res_back_postcrisis$u)
+
+plot(
+  horizon,
+  res_back_precrisis$u,
+  type = "l",
+  lwd = 2,
+  ylim = ylim_u,
+  main = "Unemployment response",
+  xlab = "Months",
+  ylab = "Percent"
+)
+
+lines(horizon, res_back_postcrisis$u, lty = 2, lwd = 2)
+abline(h = 0, col = "red")
+
+# Real interest-rate response
+ylim_r <- range(res_back_precrisis$r_real, res_back_postcrisis$r_real)
+
+plot(
+  horizon,
+  res_back_precrisis$r_real,
+  type = "l",
+  lwd = 2,
+  ylim = ylim_r,
+  main = "Real interest-rate response",
+  xlab = "Months",
+  ylab = "Percent"
+)
+
+lines(horizon, res_back_postcrisis$r_real, lty = 2, lwd = 2)
+abline(h = 0, col = "red")
+
+dev.off()
+
+irf_back_precrisis$irf$ra[1, "ra"]
+irf_back_postcrisis$irf$ra[1, "ra"]

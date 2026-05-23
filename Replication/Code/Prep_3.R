@@ -1,5 +1,5 @@
-# For this extension, prep_1.R and prep_2.R have to be ran first.
-# this extension first compares the VAR(4) to Var (3) and VAR (5) to understand why VAR (4) was chosen as the baseline model. Then, it compares the impulse response functions of the three models to check robustness of the results to lag order choice.
+# For this last preliminary, prep_1.R and prep_2.R have to be ran first.
+#  this compares the VAR(4) to Var (3) and VAR (5) to understand why VAR (4) was chosen as the baseline model. Then, it compares the impulse response functions of the three models to check robustness of the results to lag order choice.
 
 
 var_4 <- VAR(
