@@ -71,19 +71,49 @@ MSE_rest_full : comparison of Mean Squared Errors of the CAN UNRESTRICTED model 
 - plot_mex_var : plot of trends in p, u, and r of Mexico
 
 2) Extension_2 : 
-
-
-
-
-
-# Replication 
-1) Run Prep.R to get the 1960-2000 data of the paper 
-2) Figure_X.R files can be ran indepedently, but increasing order yields the most stable outputs.
-
-# Extensions 
+- irf_postcrisis : Orthogonal IRF of a FED shock on post crisis (> 2008) sample
+- irf_precris : Orthogonal IRF of a FED shock on pre crisis (< 2008) sample
+- lag_selection_postcrisis : lag selection table (AIC, HC, BIC, FQ) of post crisis 
+- lag_selection_precrisis : lag selection table (AIC, HC, BIC, FQ) of pre crisis 
+- portmanteau_pre_post : Portmanteau test table for pre sample and post sample 
+- roots_compare : comparison table of unit roots for pre and post sample
+- stationarity_postcrisis : PP/DFGLS/KPSS p value and statistic for post crisis sample
+- stationarity_precrisis : PP/DFGLS/KPSS p value and statistic for pre crisis sample
 
 
 # Diary log
+
+## Revised 
+
+- 23/04/2026 — Reproduction of Table 1 coefficients > switched from quarterly point values to manually aggregated monthly averages > obtained results much closer to the paper, remaining differences likely due to revised FRED data.
+
+- 23/04/2026 — Replication output organization > exported Table 1 in `.typ`, `.tex`, and consolidated PDF formats > replication tables became fully operational and reusable.
+
+- 25/04/2026 — Missing diagnostics in the original paper > implemented KPSS, PP, DFGLS, lag-order selection, and Portmanteau tests > obtained evidence of strong persistence and justified VAR specifications econometrically.
+
+- 25/04/2026 — Reproduction of Figure 2 IRFs > reused recursive ordering and bootstrap confidence intervals > recovered similar dynamics but different scales and asymmetric confidence bands due to R plotting defaults and bootstrap construction.
+
+- 26/04/2026 — Reproduction of Figure 3 monetary-rule IRFs > replaced actual future observations with VAR-based forecasts > corrected the forward-looking Taylor-rule implementation.
+
+- 15/05/2026 — Revision of Figure 2 and Figure 3 replication > explicitly selected the intended variables and reimplemented the Taylor rule > obtained much more convincing impulse responses.
+
+- 15/05/2026 — First extension on international spillovers > estimated VARs with US and Mexican variables > found significant spillover effects on Mexican unemployment and monetary policy.
+
+- 15/05/2026 — Mexican data-quality issue > identified missing unemployment observations and replaced them with OECD series > obtained more stable and economically plausible VAR estimates.
+
+- 15/05/2026 — Preliminary econometric diagnostics > implemented stationarity and lag-order specification procedures and exported outputs > completed the preliminary validation stage of the replication.
+
+- 19/05/2026 — Investigation of remaining discrepancies with the paper > translated original `.gss` and `.srt` replication files and compared them with the R implementation > identified coefficient and Taylor-rule specification differences and substantially improved replication quality.
+
+- 19/05/2026 — Simplification of the international extension > retained only US Fed funds rate as US explanatory variable > obtained cleaner and more interpretable VAR results.
+
+- 21/05/2026 — Monthly-data extension for Mexico > proxied inflation with monthly CPI inflation to increase sample size > approximately doubled the number of observations, although results remained somewhat unstable.
+
+- 21/05/2026 — Pre/post financial-crisis subsample extension > constructed monthly CPI-based datasets and implemented stationarity and lag-order diagnostics > retained VAR(2) for the pre-crisis sample and VAR(4) for the post-crisis sample.
+
+- 23/05/2026 — Final documentation phase > revised the README and integrated explicit Taylor-rule coefficients into the methodological description > improved transparency and reproducibility of the project.
+
+## Original
 
 23/04/26: I reproduced the panel A of Table 1 but coefficients differ significantly -> solution: take montly data then compute manually quaterly averages as in the paper (rather than quarter point values from fred) - > I obtain much similar results, minor significances due to the fred data being revised ?
 
@@ -111,7 +141,7 @@ For mexico, I noticed that some values were missing (eg, the u rate that was NA 
 21/05/2026 : Again for Mexico, I try to use monthly data to have more observations. I proxy monthly inflation rate with monthly Consumer Price Index (CPI), it approx. doubles the sample size. Results are somehow inconsistent. 
 21/05 : I started the subsample extension : for the inflation proxy I switched to the CPI as to have monthly data for all periods, realised stationarity and lag order selection: I get VAR 2 and 4 and keep this specification.
 
-23/05/2026: I have some time left so I will try to see for EU spillover. 
+23/05/2026: I wrote the final readme. I also include the coefficients of the monetary rule of fig3 inside for comprehensiveness instead of plain values. 
 
 
 
