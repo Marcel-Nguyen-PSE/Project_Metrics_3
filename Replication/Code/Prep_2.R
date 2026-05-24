@@ -254,3 +254,5 @@ grid.table(diagnostics_1)
 dev.off()
 
 
+str(pp_test)
+pp_test
