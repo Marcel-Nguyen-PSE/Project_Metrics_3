@@ -110,7 +110,9 @@ NB: (**.typ** and **.tex** only change the file format, not the content)
 
 - **21/05/2026** — Pre/post financial-crisis subsample extension > constructed monthly CPI-based datasets and implemented stationarity and lag-order diagnostics > retained VAR(2) for the pre-crisis sample and VAR(4) for the post-crisis sample.
 
-- **23/05/2026** — Final documentation phase > revised the README and integrated explicit Taylor-rule coefficients into the methodological description > improved transparency and reproducibility of the project.
+- **23/05/2026** — Subsample IRF extension and structural VAR estimation > refined recursive VAR specifications and tested forward-/backward-looking Taylor rules > identified instability and economically implausible IRFs in forward-looking specifications due to fixed-point correction and persistent monthly dynamics.
+
+- **24/05/2026** — Replication and stationarity diagnostics correction > verified PP/DFGLS test conventions and normalized initial Taylor-rule shocks > reconciled stationarity test interpretation and successfully reproduced the paper’s replication graph.
 
 ## Original
 
@@ -145,3 +147,5 @@ For mexico, I noticed that some values were missing (eg, the u rate that was NA 
 23/05 : I computed better IRFs for extension on subsamples, concentrated analysis on response to monetary shock for recursive VAR. Then I tried to build the structural VAR. i got problems with the IRFS: in figure 3 to compute the best IRFs, authors used an unusual sign convention. Firstly for backward-looking Taylor rule, one can see that post crisis dynamics are not really stable for unemployment. For forward looking taylor rule, I used k = 12 months at the beginning but got weird IRFs so I checked fu_fwd = 13.55 which showed that forward-looking rule is unstable and 1 - fwd_precrisis$fr_raw = -0.0845 so the fixed-point correction is blowing up the coefficients. I try again using k = 4 to have more stable coefficients (because shorter forecast horizon leads to weaker cumulative persistence and smaller fr_raw). But it did not solve the main issue that monthly subsample VAR dynamics are still too persistent/noisy, especially with CPI. In conclusion, forward-looking coefficients remain economically implausible.
 
 24/05/2026 : I reread the table of stationarity results in preliminary section and i realized that p values and statistics were incompatible for PP test. so I tried to find why and it was just because they don't use the usual tau statistic but the Dickey-Fuller Z(alpha) statistic. Similarly for the DFGLS it was not a p value but the critic value at 5%.
+
+24/05/2026 : Alexia noticed that the taylor rule in replication 1 was wrong. I corrected it by normalizing the intitial shocks to 1. Now the Graph is identical to the one on the paper
