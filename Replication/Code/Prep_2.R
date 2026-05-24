@@ -253,6 +253,3 @@ pdf("Replication/Figures/Preliminaries/PDF/diagnostics_1.pdf", width = 10, heigh
 grid.table(diagnostics_1)
 dev.off()
 
-
-str(pp_test)
-pp_test
