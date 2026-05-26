@@ -767,3 +767,48 @@ ggsave(
   width = 12,
   height = 8
 )
+
+# --- Add. test: Granger causality ---
+
+granger_can_full <- causality(var_us_can, cause = c("p", "u", "r"))
+granger_can_rest <- causality(var_us_can_rest, cause = 'r')
+granger_mex_2001 <- causality(var_us_mex_2001, cause = c("p", "u", "r"))
+granger_mex_rest <- causality(var_us_mex_rest, cause = 'r')
+
+granger_results <- data.frame(
+  Model = c(
+    "US-CAN",
+    "US-CAN-REST",
+    "US-MEX-2001",
+    "US-MEX-REST"
+  ),
+  Cause = c(
+    "p,u,r",
+    "r",
+    "p,u,r",
+    "r"
+  ),
+  Statistic = c(
+    granger_can_full$Granger$statistic,
+    granger_can_rest$Granger$statistic,
+    granger_mex_2001$Granger$statistic,
+    granger_mex_rest$Granger$statistic
+  ),
+  P_value = c(
+    granger_can_full$Granger$p.value,
+    granger_can_rest$Granger$p.value,
+    granger_mex_2001$Granger$p.value,
+    granger_mex_rest$Granger$p.value
+  ),
+  DF = c(
+    granger_can_full$Granger$parameter,
+    granger_can_rest$Granger$parameter,
+    granger_mex_2001$Granger$parameter,
+    granger_mex_rest$Granger$parameter
+  )
+) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+# Final output 
+
+tt_save(tt(granger_results, rownames = FALSE), 'Extension/Extension_1/Figures/granger_tests_can_mex.typ')
