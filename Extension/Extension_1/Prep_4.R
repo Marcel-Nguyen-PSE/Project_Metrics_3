@@ -99,13 +99,13 @@ gdpd_mex <- read_csv('Extension/Extension_1/Data/Mex_GDP_Deflator_Ind2017.csv') 
 
 unrate_mex <- fredr(
   series_id = "LRHUTTTTMXM156S",
-  observation_start = as.Date("1987-01-01"),
+  observation_start = as.Date("1990-01-01"),
   observation_end   = as.Date("2019-12-31")
 )
 
 ffr_mex <- fredr(
   series_id = "IRSTCI01MXQ156N",
-  observation_start = as.Date("1987-01-01"),
+  observation_start = as.Date("1990-01-01"),
   observation_end   = as.Date("2019-12-31")
 )
 
@@ -183,7 +183,7 @@ dev.off()
 
 cpi_mex_monthly <- fredr(
   series_id = "CPALTT01MXM657N",
-  observation_start = as.Date("2000-01-01"),
+  observation_start = as.Date("1990-01-01"),
   observation_end   = as.Date("2019-12-31")
 ) %>%
   rename(p_monthly = 'value') %>%
@@ -196,7 +196,7 @@ u_mex_monthly <- read_csv('Extension/Extension_1/Data/LRHUTTTTMXM156S.csv')%>%
 
 r_mex_monthly <- fredr(
   series_id = "IRSTCI01MXM156N",
-  observation_start = as.Date("2000-01-01"),
+  observation_start = as.Date("1990-01-01"),
   observation_end   = as.Date("2019-12-31")
 ) %>%
   rename(r_monthly = 'value') %>%
@@ -207,7 +207,7 @@ macro_mex_monthly <- cpi_mex_monthly %>%
   left_join(r_mex_monthly, by = 'date')
 
 ffr_2000 <- ffr %>%
-  filter(date >= as.Date('2000-01-01'))
+  filter(date >= as.Date('1990-01-01'))
 
 macro_mex_us_monthly <- macro_mex_monthly %>%
   left_join(ffr_2000, by = 'date') %>%
