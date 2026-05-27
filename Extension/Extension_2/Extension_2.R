@@ -1,40 +1,3 @@
-#########################################################
-# Monthly dataset: CPI inflation, unemployment, Fed funds
-#########################################################
-
-cpi <- fredr(
-  series_id = "CPIAUCSL",
-  observation_start = as.Date("1955-01-01"),
-  observation_end   = as.Date("2019-12-31")
-)
-
-unrate_monthly <- unrate %>%
-  transmute(date, u = value)
-
-ffr_monthly <- ffr %>%
-  transmute(date, r = value)
-
-macro_monthly <- cpi %>%
-  transmute(date, cpi = value) %>%
-  left_join(unrate_monthly, by = "date") %>%
-  left_join(ffr_monthly, by = "date") %>%
-  arrange(date) %>%
-  mutate(p = 1200 * log(cpi / lag(cpi))) %>%     # monthly CPI growth × 12 × 100 ie p = annualized monthly inflation, in % per year.
-  dplyr::select(date, p, u, r) %>%
-  drop_na()
-
-#subsamples pre and post crisis
-
-  macro_monthly_precrisis <- macro_monthly %>%
-  filter(date >= as.Date("1984-01-01"),
-         date <  as.Date("2008-01-01")) %>%
-  dplyr::select(p, u, r)
-
-macro_monthly_postcrisis <- macro_monthly %>%
-  filter(date >= as.Date("2010-01-01"),
-         date <  as.Date("2020-01-01")) %>%
-  dplyr::select(p, u, r)
-
 # stationarity tests
 
 run_stationarity <- function(data) {
@@ -375,52 +338,6 @@ for (i in seq_along(responses)) {
 
 dev.off()
 
-#for complement : full irfs
-
-irf_precrisis_full <- irf(
-  var_precrisis,
-  impulse = c("p", "u", "r"),
-  response = c("p", "u", "r"),
-  n.ahead = 24,
-  ortho = TRUE,
-  boot = TRUE,
-  runs = 1000,
-  ci = 0.66
-)
-
-irf_postcrisis_full <- irf(
-  var_postcrisis,
-  impulse = c("p", "u", "r"),
-  response = c("p", "u", "r"),
-  n.ahead = 24,
-  ortho = TRUE,
-  boot = TRUE,
-  runs = 1000,
-  ci = 0.66
-)
-
-jpeg(
-  "Extension/Extension_2/Figures/irf_precrisis_full.jpeg",
-  width = 1800,
-  height = 1800,
-  res = 150
-)
-
-plot(irf_precrisis_full, plot.type = "single")
-
-dev.off()
-
-jpeg(
-  "Extension/Extension_2/Figures/irf_postcrisis_full.jpeg",
-  width = 1800,
-  height = 1800,
-  res = 150
-)
-
-plot(irf_postcrisis_full, plot.type = "single")
-
-dev.off()
-
 #########################################################
 # Full IRFs: pre-crisis and post-crisis
 #########################################################
@@ -604,57 +521,6 @@ res_back_postcrisis <- recover_irf_sd(
 sd(taylor_backward_precrisis$ra)
 sd(taylor_backward_postcrisis$ra)
 
-#########################################################
-# Export backward-looking Taylor-rule IRFs
-#########################################################
-
-jpeg(
-  "Extension/Extension_2/Figures/irf_taylor_backward_pre_post.jpeg",
-  width = 1800,
-  height = 1200,
-  res = 150
-)
-
-horizon <- 0:24
-par(mfrow = c(2, 2))
-
-plot(
-  horizon, res_back_precrisis$p,
-  type = "l", lwd = 2,
-  ylim = range(res_back_precrisis$p, res_back_postcrisis$p),
-  main = "Inflation response",
-  xlab = "Months",
-  ylab = "Percent"
-)
-lines(horizon, res_back_postcrisis$p, lty = 2, lwd = 2)
-abline(h = 0, col = "red")
-legend("topright",
-       legend = c("Pre-crisis", "Post-crisis"),
-       lty = c(1, 2), lwd = 2, bty = "n")
-
-plot(
-  horizon, res_back_precrisis$u,
-  type = "l", lwd = 2,
-  ylim = range(res_back_precrisis$u, res_back_postcrisis$u),
-  main = "Unemployment response",
-  xlab = "Months",
-  ylab = "Percent"
-)
-lines(horizon, res_back_postcrisis$u, lty = 2, lwd = 2)
-abline(h = 0, col = "red")
-
-plot(
-  horizon, res_back_precrisis$r_real,
-  type = "l", lwd = 2,
-  ylim = range(res_back_precrisis$r_real, res_back_postcrisis$r_real),
-  main = "Real interest-rate response",
-  xlab = "Months",
-  ylab = "Percent"
-)
-lines(horizon, res_back_postcrisis$r_real, lty = 2, lwd = 2)
-abline(h = 0, col = "red")
-
-dev.off()
 
 #########################################################
 # Forward-looking Taylor rule: pre/post crisis extension
