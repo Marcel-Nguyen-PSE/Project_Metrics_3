@@ -313,12 +313,6 @@ irf_postcrisis <- irf(
 # Side-by-side IRFs: pre-crisis vs post-crisis response to monetary-policy shock IRF
 #########################################################
 
-dir.create(
-  "Extension/Extension_2/Figures",
-  recursive = TRUE,
-  showWarnings = FALSE
-)
-
 jpeg(
   "Extension/Extension_2/Figures/irf_pre_post_comparison.jpeg",
   width = 2400,
@@ -453,35 +447,80 @@ irf_postcrisis_full <- irf(
   ci = 0.66
 )
 
-dir.create(
-  "Extension/Extension_2/Figures",
-  recursive = TRUE,
-  showWarnings = FALSE
-)
-
 jpeg(
-  "Extension/Extension_2/Figures/irf_precrisis_full.jpeg",
+  "Extension/Extension_2/Figures/irf_combined.jpeg",
   width = 1800,
   height = 1800,
   res = 150
 )
 
-par(mfrow = c(3, 3), ask = FALSE)
+par(mfrow = c(3,3), mar = c(3,3,2,1))
 
-plot(irf_precrisis_full, plot.type = "single", ask = FALSE)
+variables <- c("p", "u", "r")
 
-dev.off()
-
-jpeg(
-  "Extension/Extension_2/Figures/irf_postcrisis_full.jpeg",
-  width = 1800,
-  height = 1800,
-  res = 150
-)
-
-par(mfrow = c(3, 3), ask = FALSE)
-
-plot(irf_postcrisis_full, plot.type = "single", ask = FALSE)
+for (imp in variables) {
+  for (resp in variables) {
+    
+    pre_irf <- irf_precrisis_full$irf[[imp]][, resp]
+    post_irf <- irf_postcrisis_full$irf[[imp]][, resp]
+    
+    pre_low <- irf_precrisis_full$Lower[[imp]][, resp]
+    pre_up  <- irf_precrisis_full$Upper[[imp]][, resp]
+    
+    post_low <- irf_postcrisis_full$Lower[[imp]][, resp]
+    post_up  <- irf_postcrisis_full$Upper[[imp]][, resp]
+    
+    horizon <- 0:24
+    
+    ylim_range <- range(
+      c(pre_low, pre_up, post_low, post_up),
+      na.rm = TRUE
+    )
+    
+    plot(
+      horizon,
+      pre_irf,
+      type = "l",
+      col = "darkgreen",
+      lwd = 2,
+      ylim = ylim_range,
+      xlab = "Months",
+      ylab = resp,
+      main = paste("Orthogonal Impulse Response from", imp)
+    )
+    
+    lines(horizon, pre_low,
+          col = "darkgreen",
+          lty = 2)
+    
+    lines(horizon, pre_up,
+          col = "darkgreen",
+          lty = 2)
+    
+    lines(horizon, post_irf,
+          col = "blue",
+          lwd = 2)
+    
+    lines(horizon, post_low,
+          col = "blue",
+          lty = 2)
+    
+    lines(horizon, post_up,
+          col = "blue",
+          lty = 2)
+    
+    abline(h = 0, col = "red")
+    
+    legend(
+      "topright",
+      legend = c("Pre-crisis", "Post-crisis"),
+      col = c("darkgreen", "blue"),
+      lwd = 2,
+      bty = "n",
+      cex = 0.8
+    )
+  }
+}
 
 dev.off()
 
@@ -568,10 +607,6 @@ sd(taylor_backward_postcrisis$ra)
 #########################################################
 # Export backward-looking Taylor-rule IRFs
 #########################################################
-
-dir.create("Extension/Extension_2/Figures",
-           recursive = TRUE,
-           showWarnings = FALSE)
 
 jpeg(
   "Extension/Extension_2/Figures/irf_taylor_backward_pre_post.jpeg",
@@ -724,6 +759,28 @@ taylor_forward_postcrisis <- macro_monthly_postcrisis %>%
 var_forw_precrisis <- VAR(taylor_forward_precrisis, p = 2, type = "const")
 var_forw_postcrisis <- VAR(taylor_forward_postcrisis, p = 4, type = "const")
 
+irf_forw_precrisis <- irf(
+  var_forw_precrisis,
+  impulse = "ra",
+  response = c("ra", "p", "u"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
+irf_forw_postcrisis <- irf(
+  var_forw_postcrisis,
+  impulse = "ra",
+  response = c("ra", "p", "u"),
+  n.ahead = 24,
+  ortho = TRUE,
+  boot = TRUE,
+  runs = 1000,
+  ci = 0.66
+)
+
 
 # Recover normalized IRFs to a 1 pp nominal-rate shock using the same standard-deviation normalization as for the backward-looking Taylor rule.
 
@@ -766,34 +823,80 @@ res_forw_postcrisis <- recover_irf(
 #########################################################
 
 jpeg(
-  "Extension/Extension_2/Figures/irf_taylor_forward_pre_post.jpeg",
+  "Extension/Extension_2/Figures/irf_taylor_backward_forward_pre_post.jpeg",
   width = 1800,
   height = 1200,
   res = 150
 )
 
 horizon <- 0:24
-par(mfrow = c(2, 2))
+
+par(
+  mfrow = c(2, 3),
+  mar = c(3, 3, 2, 1),
+  cex.main = 0.9,
+  cex.lab = 0.8,
+  cex.axis = 0.7
+)
+
+
+plot(
+  horizon, res_back_precrisis$p,
+  type = "l", lwd = 2,
+  ylim = range(res_back_precrisis$p, res_back_postcrisis$p),
+  main = "Backward: inflation response",
+  xlab = "Months",
+  ylab = "Percent"
+)
+lines(horizon, res_back_postcrisis$p, lty = 2, lwd = 2)
+abline(h = 0, col = "red")
+legend(
+  "topright",
+  legend = c("Pre-crisis", "Post-crisis"),
+  lty = c(1, 2),
+  lwd = 2,
+  bty = "n",
+  cex = 0.8
+)
+
+plot(
+  horizon, res_back_precrisis$u,
+  type = "l", lwd = 2,
+  ylim = range(res_back_precrisis$u, res_back_postcrisis$u),
+  main = "Backward: unemployment response",
+  xlab = "Months",
+  ylab = "Percent"
+)
+lines(horizon, res_back_postcrisis$u, lty = 2, lwd = 2)
+abline(h = 0, col = "red")
+
+plot(
+  horizon, res_back_precrisis$r_real,
+  type = "l", lwd = 2,
+  ylim = range(res_back_precrisis$r_real, res_back_postcrisis$r_real),
+  main = "Backward: real interest-rate response",
+  xlab = "Months",
+  ylab = "Percent"
+)
+lines(horizon, res_back_postcrisis$r_real, lty = 2, lwd = 2)
+abline(h = 0, col = "red")
 
 plot(
   horizon, res_forw_precrisis$p,
   type = "l", lwd = 2,
   ylim = range(res_forw_precrisis$p, res_forw_postcrisis$p),
-  main = "Inflation response",
+  main = "Forward: inflation response",
   xlab = "Months",
   ylab = "Percent"
 )
 lines(horizon, res_forw_postcrisis$p, lty = 2, lwd = 2)
 abline(h = 0, col = "red")
-legend("topright",
-       legend = c("Pre-crisis", "Post-crisis"),
-       lty = c(1, 2), lwd = 2, bty = "n")
 
 plot(
   horizon, res_forw_precrisis$u,
   type = "l", lwd = 2,
   ylim = range(res_forw_precrisis$u, res_forw_postcrisis$u),
-  main = "Unemployment response",
+  main = "Forward: unemployment response",
   xlab = "Months",
   ylab = "Percent"
 )
@@ -804,7 +907,7 @@ plot(
   horizon, res_forw_precrisis$r_real,
   type = "l", lwd = 2,
   ylim = range(res_forw_precrisis$r_real, res_forw_postcrisis$r_real),
-  main = "Real interest-rate response",
+  main = "Forward: real interest-rate response",
   xlab = "Months",
   ylab = "Percent"
 )
