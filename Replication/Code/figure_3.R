@@ -60,7 +60,7 @@ res_forw <- recover_irf(irf_forw, fp_fwd,  fu_fwd)
 horizon <- 0:24
 
 jpeg("Replication/Figures/Fig_3/irf_taylor.jpeg", width = 1800, height = 1200, res = 150)
-par(mfrow = c(2, 2))
+par(mfrow = c(1, 3))
 
 plot(horizon, res_back$p, type="l", lwd=2,
      main="Response of Inflation", xlab="Lag", ylab="Percent", ylim=c(-2.5, 0.5))
@@ -79,3 +79,4 @@ lines(horizon, res_forw$r_real, lty=2, lwd=2)
 abline(h=0, col="red")
 
 dev.off()
+
