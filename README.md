@@ -117,6 +117,10 @@ NB: (**.typ** and **.tex** only change the file format, not the content)
 
 - **24/05/2026** — Replication and stationarity diagnostics correction > verified PP/DFGLS test conventions and normalized initial Taylor-rule shocks > reconciled stationarity test interpretation and successfully reproduced the paper’s replication graph.
 
+- **27/06/2026** - Reorganization of the code repository and debug of obsolete code.
+
+- **28/06/2026** - Noticed an inconsistent result about the lag-order selection test of Mexico Quarterly and Monthly > refound plausible specifications.
+
 ## Original
 
 23/04/26: I reproduced the panel A of Table 1 but coefficients differ significantly -> solution: take montly data then compute manually quaterly averages as in the paper (rather than quarter point values from fred) - > I obtain much similar results, minor significances due to the fred data being revised ?
@@ -156,3 +160,5 @@ For mexico, I noticed that some values were missing (eg, the u rate that was NA 
 24/05/2026 : i redo my IRFs following the right taylor rule as well. I try normalizing the initial shocks to 1. I get IRFs with inflation near 1000, real rates near -1200, unstable unemployment oscillations. so given the weak identification, the unstable structural decomposition, I renounce to transfer the quaterly Taylor-rule framework to monthly subsamples. I try to normalize by SD of ra instead ie I scale all IRFs so the contemporaneous nominal-rate response equals 1 percentage point. My IRFs represent a response to a one-standard-deviation monetary-policy shock which solves the scale problem but not the sign reversal i have for unemployment. 
 
 27/05/2026 : reorganized the code so it is easier to go through, deleted some parts that became obsolete and assessed new tests on lag order selection for Mexico as it was unclear in the presentation. 
+
+28/05/2026 : recomputed the lag-order of the monthly and quarterly speicification, found more coherent result esp about the VAR spec of Mexico 
