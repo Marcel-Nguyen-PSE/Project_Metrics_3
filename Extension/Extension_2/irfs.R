@@ -279,3 +279,67 @@ res_forw_postcrisis <- recover_irf(
   fp_fwd_post,
   fu_fwd_post
 )
+
+jpeg(
+  "Extension/Extension_2/Figures/irf_r_only_combined.jpeg",
+  width = 1800,
+  height = 600,
+  res = 150
+)
+
+par(mfrow = c(1, 3), mar = c(3, 3, 2, 1))
+
+imp <- "r"
+responses <- c("p", "u", "r")
+
+for (resp in responses) {
+  
+  pre_irf <- irf_precrisis_full$irf[[imp]][, resp]
+  post_irf <- irf_postcrisis_full$irf[[imp]][, resp]
+  
+  pre_low <- irf_precrisis_full$Lower[[imp]][, resp]
+  pre_up  <- irf_precrisis_full$Upper[[imp]][, resp]
+  
+  post_low <- irf_postcrisis_full$Lower[[imp]][, resp]
+  post_up  <- irf_postcrisis_full$Upper[[imp]][, resp]
+  
+  horizon <- 0:24
+  
+  ylim_range <- range(
+    c(pre_low, pre_up, post_low, post_up),
+    na.rm = TRUE
+  )
+  
+  plot(
+    horizon,
+    pre_irf,
+    type = "l",
+    col = "darkgreen",
+    lwd = 2,
+    ylim = ylim_range,
+    xlab = "Months",
+    ylab = resp,
+    main = paste("Orthogonal Impulse Response from", imp)
+  )
+  
+  lines(horizon, pre_low, col = "darkgreen", lty = 2)
+  lines(horizon, pre_up,  col = "darkgreen", lty = 2)
+  
+  lines(horizon, post_irf, col = "blue", lwd = 2)
+  lines(horizon, post_low, col = "blue", lty = 2)
+  lines(horizon, post_up,  col = "blue", lty = 2)
+  
+  abline(h = 0, col = "red")
+  
+  legend(
+    "topright",
+    legend = c("Pre-crisis", "Post-crisis"),
+    col = c("darkgreen", "blue"),
+    lwd = 2,
+    bty = "n",
+    cex = 0.8
+  )
+}
+
+dev.off()
+
