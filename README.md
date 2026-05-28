@@ -45,33 +45,36 @@ NB: (**.typ** and **.tex** only change the file format, not the content)
 
 ## Code summary 
 
-0) Data prep files: **Prep_1.R**, **Prep_2.R**, **Prep_3.R**, **Prep_4.R** have to be ran first.  
-1) **extension_1.R**: produces outputs for the study of spillovers on Canada (1960–2019) and Mexico (2000–2019)  
-2) **extension_2.R**: produces outputs for the study of pre/post-2008 financial crisis dynamics in the US  
+0) Data prep files: **Prep_1.R**, **Prep_2.R**, **Prep_3.R**, **prep_4.R**, **Prep_5.R** have to be ran first for all extensions 
+1) **extension_1.R**: produces outputs for the study of spillovers on Canada (1960–2019) and Mexico (2000–2019) which include: 
+    - **fevd.R**: computes only the FEVD decomposition plots of the extension_1
+    - **irfs.R**: computes only the IRFs plots of extension_1
+    - **lag_table_results.R**: computes only the lag-order selection tables of extension_1
+    - **mse.R**: computes only the mean squared errors (MSE) of extension_1
+2) **extension_2.R**: produces outputs for the study of pre/post-2008 financial crisis dynamics in the US which include :
+    - **irfs.R**: computes only the IRFs plots of extension_2
+    - **tests.R**: computes only the stationarity test, lag order tests, and other inference tests of extension_2
 
 ## Figures summary 
 
 ### 1) Extension_1 
-- **acf_pacf_restricted** : ACF and PACF plots of the restricted CAN model 
 - **FEVD_CAN_US** : Forecast Error Variance Decomposition plot of the restricted CAN model 
 - **FEVD_MEX_monthly_US** : Forecast Error Variance Decomposition of the monthly restricted MEX model
 - **FEVD_MEX_US_rest** : Forecast Error Variance Decomposition of the restricted quarterly MEX model 
-- **FEVD_MEX_US** : Forecast Error Variance Decomposition of the unrestricted quarterly MEX model
 - **irf_can_us_r_rest** : IRFs of the restricted CAN model in response to a FED interest-rate shock 
 - **irf_can_us_r** : IRFs of the unrestricted CAN model in response to a FED interest-rate shock
 - **irf_full_vs_restricted** : Comparison of restricted and unrestricted CAN IRFs following a FED interest-rate shock 
-- **irf_mex_monthly** : IRFs of the monthly restricted MEX model in response to a FED interest-rate shock 
-- **irf_mex_us_p** : IRFs of the unrestricted MEX model in response to an inflation shock
-- **irf_mex_us_r** : IRFs of the unrestricted MEX model in response to an interest-rate shock
 - **lag_table_can_rest** : Lag-order selection table for the restricted CAN model 
 - **lag_table_mex_rest_monthly** : Lag-order selection table for the restricted monthly MEX model
 - **lag_table_mex_rest** : Lag-order selection table for the restricted quarterly MEX model
 - **MSE_rest_full** : Comparison of mean squared errors between restricted and unrestricted CAN models
-- **plot_mex_var** : Plot of Mexican inflation, unemployment, and interest-rate dynamics
+- **MSE_mex_rest_full** : Comparison of mean squared errors between restricted and unrestricted MEX models
+
 
 ### 2) Extension_2 
-- **irf_postcrisis** : Orthogonal IRFs of a FED shock in the post-crisis sample (> 2008)
-- **irf_precrisis** : Orthogonal IRFs of a FED shock in the pre-crisis sample (< 2008)
+- **irf_pre_post_comparison** : Orthogonal IRFs of a FED shock in the pre-crisis sample (< 2008) and in the post-crisis sample (> 2008)
+- **irf_combined** : combination of both IRFs plots (pre and post) 
+- **irf_taylor_backward_forward_pre_post**: grid plot of IRFs responses wrt taylor rule specification (backward looking and forward looking)
 - **lag_selection_postcrisis** : Lag-selection table (AIC, HQ, BIC, FPE) for the post-crisis sample
 - **lag_selection_precrisis** : Lag-selection table (AIC, HQ, BIC, FPE) for the pre-crisis sample
 - **portmanteau_pre_post** : Portmanteau test comparison table across subsamples
@@ -151,3 +154,5 @@ For mexico, I noticed that some values were missing (eg, the u rate that was NA 
 24/05/2026 : Alexia noticed that the taylor rule in replication 1 was wrong. I corrected it by normalizing the intitial shocks to 1. Now the Graph is identical to the one on the paper
 
 24/05/2026 : i redo my IRFs following the right taylor rule as well. I try normalizing the initial shocks to 1. I get IRFs with inflation near 1000, real rates near -1200, unstable unemployment oscillations. so given the weak identification, the unstable structural decomposition, I renounce to transfer the quaterly Taylor-rule framework to monthly subsamples. I try to normalize by SD of ra instead ie I scale all IRFs so the contemporaneous nominal-rate response equals 1 percentage point. My IRFs represent a response to a one-standard-deviation monetary-policy shock which solves the scale problem but not the sign reversal i have for unemployment. 
+
+27/05/2026 : reorganized the code so it is easier to go through, deleted some parts that became obsolete and assessed new tests on lag order selection for Mexico as it was unclear in the presentation. 

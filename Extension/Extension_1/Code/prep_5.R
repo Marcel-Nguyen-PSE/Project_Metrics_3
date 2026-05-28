@@ -154,31 +154,6 @@ macro_mex_us_post2000 <- macro_mex %>%
   na.omit() %>%
   filter(date >= as.Date('1990-01-01'))
 
-# --- Trend plots of MEX variables ---
-
-plot_mex_p <- ggplot(macro_mex, aes(x = date)) + geom_line(aes(y = p_mex)) + theme_minimal()
-plot_mex_p
-plot_mex_u <- ggplot(macro_mex, aes(x = date)) + geom_line(aes(y = u_mex)) + theme_minimal()
-plot_mex_u
-plot_mex_r <- ggplot(macro_mex, aes(x = date)) + geom_line(aes(y = r_mex)) + theme_minimal()
-plot_mex_r
-
-jpeg(
-  "Extension/Extension_1/Figures/plot_mex_var.jpeg",
-  width = 2400,
-  height = 3200,
-  res = 200
-)
-
-grid.arrange(
-  plot_mex_p,
-  plot_mex_u,
-  plot_mex_r,
-  ncol = 1
-)
-
-dev.off()
-
 # --- Data prep for Mexico in months ---
 
 cpi_mex_monthly <- fredr(
