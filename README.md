@@ -5,7 +5,7 @@ This repo replicates the paper *'Monetary Policy Forecasts and Shocks Spillovers
 # Replication 
 
 ## Code summary
-0) Data prep files: **Prep_1.R**, **Prep_2.R** and **Prep_3.R** have to be fully ran first.  
+0) Data prep files: **Prep_1.R**, **Prep_2.R** and **Prep_3.R** have to be fully ran first. The file **run_prep_all.R** does this. 
 1) **figure_1.R**: reproduces the Variance Decomposition Tables of the paper (i.e Table 1)  
 2) **figure_2.R**: reproduces Impulse Responses in the Inflation-Unemployment Recursive VAR (i.e, Figure 1)  
 3) **figure_3.R**: recomputes coefficients of monetary rule and replicates Impulse Responses of Monetary Shocks for Different Taylor Rules (i.e, Figure 2)  
