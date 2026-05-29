@@ -162,3 +162,4 @@ For mexico, I noticed that some values were missing (eg, the u rate that was NA 
 27/05/2026 : reorganized the code so it is easier to go through, deleted some parts that became obsolete and assessed new tests on lag order selection for Mexico as it was unclear in the presentation. 
 
 28/05/2026 : recomputed the lag-order of the monthly and quarterly speicification, found more coherent result esp about the VAR spec of Mexico 
+29/05/26 : we finished the redaction of the report taking into account remarks regarding the addition of figures within the main part.
