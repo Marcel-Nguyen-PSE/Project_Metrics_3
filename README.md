@@ -4,7 +4,7 @@ This repo replicates the paper *'Monetary Policy Forecasts and Shocks Spillovers
 
 NB: the report was edited with the Typst language. Find a read-only link below:
 
-https://typst.app/project/wW1i7qctBbWiWX97n8Qn6H
+https://typst.app/project/rrHlEsK3qHWE2CL75PhtDe
 
 # Replication 
 
