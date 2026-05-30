@@ -2,6 +2,10 @@
 
 This repo replicates the paper *'Monetary Policy Forecasts and Shocks Spillovers of U.S on Canada and Mexico: replication and extension of a structural VAR model'*.
 
+NB: the report was edited with the Typst language. Find a read-only link below:
+
+https://typst.app/project/wW1i7qctBbWiWX97n8Qn6H
+
 # Replication 
 
 ## Code summary
